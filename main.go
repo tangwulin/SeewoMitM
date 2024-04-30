@@ -67,6 +67,7 @@ func main() {
 				fmt.Printf("write config file error: %v\n", err)
 				return
 			}
+			file.Close()
 		} else {
 			fmt.Printf("config file not found\n")
 			return
