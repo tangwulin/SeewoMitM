@@ -51,6 +51,10 @@ func Fatalf(format string, args ...interface{}) {
 	std.Fatalf(format, args...)
 }
 
+func IsLevelEnabled(level Level) bool {
+	return std.IsLevelEnabled(level)
+}
+
 // 初始化全局日志
 func InitGlobal(s Logger) {
 	std = s

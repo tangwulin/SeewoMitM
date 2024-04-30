@@ -8,6 +8,10 @@ type logrusAdapt struct {
 	l *logrus.Logger
 }
 
+func (s logrusAdapt) IsLevelEnabled(level Level) bool {
+	return s.l.IsLevelEnabled(logrus.Level(level))
+}
+
 func (s logrusAdapt) WithField(key string, value interface{}) Logger {
 	return newFieldAdapt(s.l.WithField(key, value))
 }
@@ -195,6 +199,33 @@ func (f fieldAdapt) Panicln(args ...interface{}) {
 
 func (f fieldAdapt) Trace(args ...interface{}) {
 	f.e.Trace(args...)
+}
+
+type Level uint32
+
+const (
+	// PanicLevel level, highest level of severity. Logs and then calls panic with the
+	// message passed to Debug, Info, ...
+	PanicLevel Level = iota
+	// FatalLevel level. Logs and then calls `logger.Exit(1)`. It will exit even if the
+	// logging level is set to Panic.
+	FatalLevel
+	// ErrorLevel level. Logs. Used for errors that should definitely be noted.
+	// Commonly used for hooks to send errors to an error tracking service.
+	ErrorLevel
+	// WarnLevel level. Non-critical entries that deserve eyes.
+	WarnLevel
+	// InfoLevel level. General operational entries about what's going on inside the
+	// application.
+	InfoLevel
+	// DebugLevel level. Usually only enabled when debugging. Very verbose logging.
+	DebugLevel
+	// TraceLevel level. Designates finer-grained informational events than the Debug.
+	TraceLevel
+)
+
+func (f fieldAdapt) IsLevelEnabled(level Level) bool {
+	return f.e.Logger.IsLevelEnabled(logrus.Level(level))
 }
 
 func newFieldAdapt(e *logrus.Entry) Logger {

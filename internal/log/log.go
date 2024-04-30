@@ -19,4 +19,5 @@ type Logger interface {
 	Panicf(format string, args ...interface{})
 	Fatal(args ...interface{})
 	Fatalf(format string, args ...interface{})
+	IsLevelEnabled(Level) bool
 }

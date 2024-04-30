@@ -4,13 +4,18 @@ import (
 	"SeewoMitM/internal/helper"
 	"SeewoMitM/internal/log"
 	"SeewoMitM/internal/request_handler"
+	"crypto/tls"
+	"embed"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"
 	"os"
-	"path/filepath"
+	"strconv"
 )
+
+//go:embed server.crt server.key
+var certFiles embed.FS
 
 func init() {
 	logFile := helper.GetLogFile("")
@@ -45,21 +50,42 @@ func main() {
 
 	reqHandler := request_handler.RequestHandler(upstreamPort)
 
-	currentPath, err := filepath.Abs(".")
+	//currentPath, err := filepath.Abs(".")
+	//if err != nil {
+	//	log.WithFields(log.Fields{"type": "GetCurrentPath"}).Error(err.Error())
+	//	panic(err)
+	//}
+
+	//certPath := filepath.Join(currentPath, "server.crt")
+	//keyPath := filepath.Join(currentPath, "server.key")
+	//log.WithFields(log.Fields{"type": "TLS cert"}).Info(fmt.Sprintf("cert path:%s, key path:%s", certPath, keyPath))
+	certContent, err := certFiles.ReadFile("server.crt")
 	if err != nil {
-		log.WithFields(log.Fields{"type": "GetCurrentPath"}).Error(err.Error())
-		panic(err)
+		log.WithFields(log.Fields{"type": "ReadCertFile"}).Error(err.Error())
+		return
 	}
-
-	certPath := filepath.Join(currentPath, "server.crt")
-	keyPath := filepath.Join(currentPath, "server.key")
-	log.WithFields(log.Fields{"type": "TLS cert"}).Info(fmt.Sprintf("cert path:%s, key path:%s", certPath, keyPath))
-
-	http.HandleFunc("/", reqHandler)
+	keyContent, err := certFiles.ReadFile("server.key")
+	if err != nil {
+		log.WithFields(log.Fields{"type": "ReadKeyFile"}).Error(err.Error())
+		return
+	}
 
 	log.WithFields(log.Fields{"type": "Server"}).Info(fmt.Sprintf("Listening on port %d", downstreamPort))
 
-	err = http.ListenAndServeTLS(fmt.Sprintf(":%d", downstreamPort), certPath, keyPath, nil)
+	cert, err := tls.X509KeyPair(certContent, keyContent)
+
+	s := &http.Server{
+		Addr:      ":" + strconv.Itoa(downstreamPort),
+		TLSConfig: &tls.Config{Certificates: append([]tls.Certificate{}, cert)},
+	}
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", reqHandler)
+	s.Handler = mux
+	err = s.ListenAndServeTLS("", "")
+
+	//http.HandleFunc("/", reqHandler)
+	//err = http.ListenAndServeTLS(fmt.Sprintf(":%d", downstreamPort), string(certContent), string(keyContent), nil)
 	//err = http.ListenAndServe(fmt.Sprintf(":%d", downstreamPort), nil)
 
 	if err != nil {

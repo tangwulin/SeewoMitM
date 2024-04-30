@@ -5,13 +5,20 @@ import (
 	"crypto/tls"
 	"fmt"
 	"github.com/gorilla/websocket"
+	"io"
 	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 )
 
-var upgrader = websocket.Upgrader{}
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
 
 func RequestHandler(upstreamPort int) func(w http.ResponseWriter, r *http.Request) {
 	httpsUpstreamUrl, _ := url.Parse(fmt.Sprintf("https://localhost:%d", upstreamPort))
@@ -24,18 +31,23 @@ func RequestHandler(upstreamPort int) func(w http.ResponseWriter, r *http.Reques
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !websocket.IsWebSocketUpgrade(r) {
-			log.WithFields(log.Fields{"type": "Forward_HTTP_" + r.Method, "url": httpsUpstreamUrl.Path + r.RequestURI}).Trace(r.Body)
-			forwardProxy.ServeHTTP(w, r)
-			return
+			if log.IsLevelEnabled(log.TraceLevel) {
+				bodyReader, err := r.GetBody()
+				if err != nil {
+					log.WithFields(log.Fields{"type": "Forward_HTTP_" + r.Method, "url": httpsUpstreamUrl.Path + r.RequestURI}).Error(err.Error())
+				} else {
+					body, _ := io.ReadAll(bodyReader)
+					log.WithFields(log.Fields{"type": "Forward_HTTP_" + r.Method, "url": httpsUpstreamUrl.Path + r.RequestURI}).Trace(string(body))
+				}
+
+				forwardProxy.ServeHTTP(w, r)
+				return
+			}
 		}
 
 		upload := make(chan wsMessage, 20)
 		download := make(chan wsMessage, 20)
 		errChan := make(chan error, 20)
-
-		upgrader.CheckOrigin = func(r *http.Request) bool {
-			return true
-		}
 
 		downstream, err := upgrader.Upgrade(w, r, nil)
 
