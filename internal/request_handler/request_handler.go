@@ -58,12 +58,12 @@ func RequestHandler(upstreamPort int) func(w http.ResponseWriter, r *http.Reques
 			log.WithFields(log.Fields{"type": "WS_Downstream_Upgrade"}).Info(fmt.Sprintf("Downstream Websocket upgrade success, url:%s", r.RequestURI))
 		}
 
-		//强制走ipv4连接
 		wssUpstreamUrl := fmt.Sprintf("wss://localhost:%d%s", upstreamPort, r.RequestURI)
 
 		log.WithFields(log.Fields{"type": "WS_Upstream_Url"}).Trace(wssUpstreamUrl)
 
 		dialer := websocket.Dialer{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, NetDial: func(network, addr string) (net.Conn, error) {
+			//强制走ipv4连接
 			return net.Dial("tcp4", addr)
 		}}
 
@@ -95,7 +95,6 @@ func RequestHandler(upstreamPort int) func(w http.ResponseWriter, r *http.Reques
 				log.WithFields(log.Fields{"type": "WS_Upstream_ReceiveMessage"}).Trace(string(payload))
 				if err != nil {
 					errChan <- err
-					downstream.Close()
 					log.WithFields(log.Fields{"type": "WS_Upstream"}).Info(err.Error())
 					return
 				}
@@ -119,9 +118,7 @@ func RequestHandler(upstreamPort int) func(w http.ResponseWriter, r *http.Reques
 						errChan <- err
 					}
 				case err := <-errChan:
-					downstream.Close()
 					log.WithFields(log.Fields{"type": "WS_Downstream_Close"}).Error(err.Error())
-					upstream.Close()
 					log.WithFields(log.Fields{"type": "WS_Upstream_Close"}).Error(err.Error())
 					return
 				}
