@@ -94,7 +94,7 @@ func (f fieldAdapt) WithFields(fields Fields) Logger {
 }
 
 func (f fieldAdapt) Tracef(format string, args ...interface{}) {
-	panic("implement me")
+	f.e.Tracef(format, args...)
 }
 
 func (f fieldAdapt) WithError(err error) Logger {
