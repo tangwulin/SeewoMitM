@@ -26,6 +26,7 @@ func main() {
 	logFilePathPtr := flag.String("log", "", "日志文件路径")
 	upstreamPortPtr := flag.Int("upstream", 0, "上游端口")
 	downstreamPortPtr := flag.Int("downstream", 0, "下游端口")
+	logLevelPtr := flag.String("logLevel", "", "日志级别")
 	//runAsDaemonPtr := flag.Bool("daemon", false, "是否以守护进程运行")
 
 	// 解析命令行参数
@@ -35,6 +36,7 @@ func main() {
 	var logDir = ""
 	var upstreamPort int
 	var downstreamPort int
+	var logLevel string
 
 	if *configFilePathPtr != "" {
 		configFilePath = *configFilePathPtr
@@ -93,12 +95,27 @@ func main() {
 		logDir = *logFilePathPtr
 	}
 
+	logLevels := []string{"trace", "debug", "info", "warn", "error", "fatal", "panic"}
+
+	// 检测有没有指定日志级别
+	if *logLevelPtr != "" {
+		for _, v := range logLevels {
+			if *logLevelPtr == v {
+				logLevel = *logLevelPtr
+				break
+			}
+		}
+		if logLevel == "" {
+			logLevel = configs.LogLevel
+		}
+	}
+
 	// 初始化日志
 	logFile := helper.GetLogFile(logDir)
 	log.InitGlobal(
 		log.NewLogrusAdapt(&logrus.Logger{Out: io.MultiWriter(os.Stdout, logFile),
 			Formatter: new(logrus.TextFormatter),
-			Hooks:     make(logrus.LevelHooks), Level: logrus.Level(log.FindLevel(configs.LogLevel))}))
+			Hooks:     make(logrus.LevelHooks), Level: logrus.Level(log.FindLevel(logLevel))}))
 
 	// 检测上游端口是否指定，如果没有指定则自动获取
 	if *upstreamPortPtr != 0 {
