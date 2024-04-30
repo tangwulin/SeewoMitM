@@ -17,9 +17,9 @@ type Config struct {
 type ScreenSaverHijackMode int32
 
 const (
-	Off ScreenSaverHijackMode = iota
-	Add
-	ReplaceAll
+	ScreenSaverHijackModeOff ScreenSaverHijackMode = iota
+	ScreenSaverHijackModeAdd
+	ScreenSaverHijackModeReplaceAll
 )
 
 type ScreenSaverHijackContent struct {

@@ -42,6 +42,8 @@ func main() {
 
 	if _, err := os.Stat(configFilePath); os.IsNotExist(err) {
 		if configFilePath == "./config.json" {
+			fmt.Println("config file not found, creating default config file...")
+
 			// 创建默认配置文件
 			file, err := os.Create(configFilePath)
 			if err != nil {
@@ -49,7 +51,16 @@ func main() {
 				return
 			}
 			defer file.Close()
-			err = json.NewEncoder(file).Encode(config.Config{})
+
+			defaultConfig := config.Config{
+				LogLevel:                 "info",
+				ScreenSaverHijackMode:    config.ScreenSaverHijackModeReplaceAll,
+				ScreenSaverHijackContent: make([]config.ScreenSaverHijackContent, 0),
+				ScreenSaverEmitTime:      600}
+
+			encoder := json.NewEncoder(file)
+			encoder.SetIndent("", "\t")
+			err = encoder.Encode(defaultConfig)
 			if err != nil {
 				fmt.Printf("write config file error: %v\n", err)
 				return
