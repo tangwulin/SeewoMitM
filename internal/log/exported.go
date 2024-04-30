@@ -59,3 +59,24 @@ func IsLevelEnabled(level Level) bool {
 func InitGlobal(s Logger) {
 	std = s
 }
+
+func FindLevel(level string) Level {
+	switch level {
+	case "trace":
+		return TraceLevel
+	case "debug":
+		return DebugLevel
+	case "info":
+		return InfoLevel
+	case "warn":
+		return WarnLevel
+	case "error":
+		return ErrorLevel
+	case "fatal":
+		return FatalLevel
+	case "panic":
+		return PanicLevel
+	default:
+		return InfoLevel
+	}
+}
