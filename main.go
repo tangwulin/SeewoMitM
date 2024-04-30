@@ -22,7 +22,7 @@ func init() {
 	log.InitGlobal(
 		log.NewLogrusAdapt(&logrus.Logger{Out: io.MultiWriter(os.Stdout, logFile),
 			Formatter: new(logrus.TextFormatter),
-			Hooks:     make(logrus.LevelHooks), Level: logrus.TraceLevel}))
+			Hooks:     make(logrus.LevelHooks), Level: logrus.DebugLevel}))
 }
 
 func main() {
@@ -50,15 +50,6 @@ func main() {
 
 	reqHandler := request_handler.RequestHandler(upstreamPort)
 
-	//currentPath, err := filepath.Abs(".")
-	//if err != nil {
-	//	log.WithFields(log.Fields{"type": "GetCurrentPath"}).Error(err.Error())
-	//	panic(err)
-	//}
-
-	//certPath := filepath.Join(currentPath, "server.crt")
-	//keyPath := filepath.Join(currentPath, "server.key")
-	//log.WithFields(log.Fields{"type": "TLS cert"}).Info(fmt.Sprintf("cert path:%s, key path:%s", certPath, keyPath))
 	certContent, err := certFiles.ReadFile("server.crt")
 	if err != nil {
 		log.WithFields(log.Fields{"type": "ReadCertFile"}).Error(err.Error())
@@ -72,7 +63,7 @@ func main() {
 
 	log.WithFields(log.Fields{"type": "Server"}).Info(fmt.Sprintf("Listening on port %d", downstreamPort))
 
-	cert, err := tls.X509KeyPair(certContent, keyContent)
+	cert, _ := tls.X509KeyPair(certContent, keyContent)
 
 	s := &http.Server{
 		Addr:      ":" + strconv.Itoa(downstreamPort),
@@ -83,10 +74,6 @@ func main() {
 	mux.HandleFunc("/", reqHandler)
 	s.Handler = mux
 	err = s.ListenAndServeTLS("", "")
-
-	//http.HandleFunc("/", reqHandler)
-	//err = http.ListenAndServeTLS(fmt.Sprintf(":%d", downstreamPort), string(certContent), string(keyContent), nil)
-	//err = http.ListenAndServe(fmt.Sprintf(":%d", downstreamPort), nil)
 
 	if err != nil {
 		log.WithFields(log.Fields{"type": "Server"}).Error(err.Error())
