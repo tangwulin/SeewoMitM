@@ -39,10 +39,9 @@ func RequestHandler(upstreamPort int) func(w http.ResponseWriter, r *http.Reques
 					body, _ := io.ReadAll(bodyReader)
 					log.WithFields(log.Fields{"type": "Forward_HTTP_" + r.Method, "url": httpsUpstreamUrl.Path + r.RequestURI}).Trace(string(body))
 				}
-
-				forwardProxy.ServeHTTP(w, r)
-				return
 			}
+			forwardProxy.ServeHTTP(w, r)
+			return
 		}
 
 		upload := make(chan wsMessage, 20)
