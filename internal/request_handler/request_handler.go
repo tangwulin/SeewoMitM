@@ -109,12 +109,14 @@ func RequestHandler(upstreamPort int) func(w http.ResponseWriter, r *http.Reques
 					log.WithFields(log.Fields{"type": "WS_Upstream_Forward"}).Trace(string(message.payload))
 					if err != nil {
 						errChan <- err
+						upstream.Close()
 					}
 				case message := <-download:
 					err := downstream.WriteMessage(message.messageType, message.payload)
 					log.WithFields(log.Fields{"type": "WS_Downstream_Forward"}).Trace(string(message.payload))
 					if err != nil {
 						errChan <- err
+						downstream.Close()
 					}
 				case err := <-errChan:
 					log.WithFields(log.Fields{"type": "WS_Downstream_Close"}).Error(err.Error())
