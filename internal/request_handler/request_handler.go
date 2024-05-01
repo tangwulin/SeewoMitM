@@ -1,6 +1,7 @@
 package request_handler
 
 import (
+	"SeewoMitM/internal/connection"
 	"SeewoMitM/internal/log"
 	"crypto/tls"
 	"fmt"
@@ -46,7 +47,7 @@ func RequestHandler(upstreamPort int) func(w http.ResponseWriter, r *http.Reques
 
 		upload := make(chan wsMessage, 20)
 		download := make(chan wsMessage, 20)
-		errChan := make(chan error, 20)
+		closeChan := make(chan error, 20)
 
 		downstream, err := upgrader.Upgrade(w, r, nil)
 
@@ -69,17 +70,24 @@ func RequestHandler(upstreamPort int) func(w http.ResponseWriter, r *http.Reques
 		upstream, _, err := dialer.Dial(wssUpstreamUrl, nil)
 		if err != nil {
 			log.WithFields(log.Fields{"type": "WS_Upstream_Connect"}).Warn(err.Error())
+			downstream.Close()
+			return
 		} else {
 			log.WithFields(log.Fields{"type": "WS_Upstream_Connect"}).Info(fmt.Sprintf("Upstream Websocket connect success, url:%s", wssUpstreamUrl))
 		}
 
+		c := &connection.Connection{URL: r.RequestURI, Upstream: upstream, Downstream: downstream}
+
+		connection.AddConnection(c)
+
 		go func() {
 			defer downstream.Close()
+			defer connection.RemoveConnection(c)
 			for {
 				mt, payload, err := downstream.ReadMessage()
 				log.WithFields(log.Fields{"type": "WS_Downstream_ReceiveMessage"}).Trace(string(payload))
 				if err != nil {
-					errChan <- err
+					closeChan <- err
 					log.WithFields(log.Fields{"type": "WS_Downstream_Close"}).Info(err.Error())
 					return
 				}
@@ -89,11 +97,12 @@ func RequestHandler(upstreamPort int) func(w http.ResponseWriter, r *http.Reques
 
 		go func() {
 			defer upstream.Close()
+			defer connection.RemoveConnection(c)
 			for {
 				mt, payload, err := upstream.ReadMessage()
 				log.WithFields(log.Fields{"type": "WS_Upstream_ReceiveMessage"}).Trace(string(payload))
 				if err != nil {
-					errChan <- err
+					closeChan <- err
 					log.WithFields(log.Fields{"type": "WS_Upstream"}).Info(err.Error())
 					return
 				}
@@ -108,19 +117,17 @@ func RequestHandler(upstreamPort int) func(w http.ResponseWriter, r *http.Reques
 					err := upstream.WriteMessage(message.messageType, message.payload)
 					log.WithFields(log.Fields{"type": "WS_Upstream_Forward"}).Trace(string(message.payload))
 					if err != nil {
-						errChan <- err
+						closeChan <- err
 						upstream.Close()
 					}
 				case message := <-download:
 					err := downstream.WriteMessage(message.messageType, message.payload)
 					log.WithFields(log.Fields{"type": "WS_Downstream_Forward"}).Trace(string(message.payload))
 					if err != nil {
-						errChan <- err
+						closeChan <- err
 						downstream.Close()
 					}
-				case err := <-errChan:
-					log.WithFields(log.Fields{"type": "WS_Downstream_Close"}).Error(err.Error())
-					log.WithFields(log.Fields{"type": "WS_Upstream_Close"}).Error(err.Error())
+				case _ = <-closeChan:
 					return
 				}
 			}
