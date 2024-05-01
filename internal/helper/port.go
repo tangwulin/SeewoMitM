@@ -1,8 +1,12 @@
 package helper
 
 import (
+	"bytes"
 	"fmt"
 	"net"
+	"os/exec"
+	"strconv"
+	"strings"
 )
 
 // GetAvailablePort 获取可用端口
@@ -39,33 +43,32 @@ func IsPortAvailable(port int) bool {
 }
 
 func GetUpstreamPort() (port int, err error) {
-	return GetUpstreamPortFromRegistry()
-	//pid, err := FindPidByName("SeewoCore.exe")
-	//if err != nil {
-	//	return 0, err
-	//}
-	//var outBytes bytes.Buffer
-	//cmdStr := fmt.Sprintf("netstat -ano -p tcp | findstr LISTENING | findstr %d", pid)
-	//cmd := exec.Command("cmd", "/c", cmdStr)
-	//cmd.Stdout = &outBytes
-	//err = cmd.Run()
-	//if err != nil {
-	//	return 0, err
-	//}
-	//resStr := outBytes.String()
-	//part := strings.Fields(resStr)
-	//if len(part) < 2 {
-	//	return 0, fmt.Errorf("no such process")
-	//}
-	//
-	//if len(part[1]) != 0 {
-	//	part2 := strings.Split(part[1], ":")
-	//	port, err := strconv.Atoi(part2[len(part2)-1])
-	//	if err != nil {
-	//		return 0, err
-	//	}
-	//	return port, nil
-	//}
-	//
-	//return 0, fmt.Errorf("unknown error")
+	pid, err := FindPidByName("SeewoCore.exe")
+	if err != nil {
+		return 0, err
+	}
+	var outBytes bytes.Buffer
+	cmdStr := fmt.Sprintf("netstat -ano -p tcp | findstr LISTENING | findstr 127.0.0.1 | findstr %d", pid)
+	cmd := exec.Command("cmd", "/c", cmdStr)
+	cmd.Stdout = &outBytes
+	err = cmd.Run()
+	if err != nil {
+		return 0, err
+	}
+	resStr := outBytes.String()
+	part := strings.Fields(resStr)
+	if len(part) < 2 {
+		return 0, fmt.Errorf("no such process")
+	}
+
+	if len(part[1]) != 0 {
+		part2 := strings.Split(part[1], ":")
+		port, err := strconv.Atoi(part2[len(part2)-1])
+		if err != nil {
+			return 0, err
+		}
+		return port, nil
+	}
+
+	return 0, fmt.Errorf("unknown error")
 }
