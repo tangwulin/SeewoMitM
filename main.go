@@ -2,17 +2,21 @@ package main
 
 import (
 	"SeewoMitM/internal/config"
+	"SeewoMitM/internal/connection"
 	"SeewoMitM/internal/helper"
 	"SeewoMitM/internal/log"
 	"SeewoMitM/internal/server"
+	"SeewoMitM/internal/timer"
 	"embed"
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 	"io"
 	"os"
 	"sync"
+	"time"
 )
 
 //go:embed server.crt server.key
@@ -174,6 +178,41 @@ func main() {
 	} else {
 		log.WithFields(log.Fields{"type": "RelaunchSeewoServiceAssistant"}).Info("SeewoServiceAssistant.exe is relaunched")
 	}
+
+	//启动屏保定时器
+	go func() {
+		err := timer.LaunchScreenSaverTimer(time.Duration(configs.ScreenSaverEmitTime)*time.Second, func() {
+			cp := *connection.GetConnectionPool()
+			for _, v := range cp {
+				if v.URL == "/forward/SeewoHugoHttp/SeewoHugoService" {
+					err := v.DownstreamConn.WriteMessage(websocket.TextMessage, []byte(`{
+		    "data": {
+		        "imageList": [
+		            "D:\\85499466.jpg",
+		            "D:\\532421.jpg",
+		            "D:\\650142.jpg",
+		            "D:\\124177.jpg",
+		            "D:\\1325365.jpg"
+		        ],
+		        "materialSource": "屏保功能来源于中国人口吧",
+		        "pictureSizeType": 1,
+		        "playMode": 0,
+		        "switchInterval": 5,
+		        "textList": []
+		    },
+		    "traceId": "0C89A601-B51D-488D-87EC-5862CE75ABE7",
+		    "url": "/displayScreenSaver"
+		}`))
+					if err != nil {
+						return
+					}
+				}
+			}
+		})
+		if err != nil {
+			return
+		}
+	}()
 
 	wg.Wait()
 }
