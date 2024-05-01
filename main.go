@@ -4,17 +4,14 @@ import (
 	"SeewoMitM/internal/config"
 	"SeewoMitM/internal/helper"
 	"SeewoMitM/internal/log"
-	"SeewoMitM/internal/request_handler"
-	"crypto/tls"
+	"SeewoMitM/internal/server"
 	"embed"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"io"
-	"net/http"
 	"os"
-	"strconv"
 	"sync"
 )
 
@@ -152,40 +149,14 @@ func main() {
 	}
 	log.WithFields(log.Fields{"type": "Downstream"}).Info(fmt.Sprintf("downstream port:%d", downstreamPort))
 
-	// 读取证书文件
-	certContent, err := certFiles.ReadFile("server.crt")
-	if err != nil {
-		log.WithFields(log.Fields{"type": "ReadCertFile"}).Error(err.Error())
-		return
-	}
-	keyContent, err := certFiles.ReadFile("server.key")
-	if err != nil {
-		log.WithFields(log.Fields{"type": "ReadKeyFile"}).Error(err.Error())
-		return
-	}
-
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 
 	// 启动服务端
 	go func() {
-		log.WithFields(log.Fields{"type": "Server"}).Info(fmt.Sprintf("Listening on port %d", downstreamPort))
-
-		cert, _ := tls.X509KeyPair(certContent, keyContent)
-
-		s := &http.Server{
-			Addr:      ":" + strconv.Itoa(downstreamPort),
-			TLSConfig: &tls.Config{Certificates: append([]tls.Certificate{}, cert)},
-		}
-
-		reqHandler := request_handler.RequestHandler(upstreamPort)
-		mux := http.NewServeMux()
-		mux.HandleFunc("/", reqHandler)
-		s.Handler = mux
-		err = s.ListenAndServeTLS("", "")
-
+		err = server.LaunchMitMServer(downstreamPort, upstreamPort, certFiles)
 		if err != nil {
-			log.WithFields(log.Fields{"type": "Server"}).Error(err.Error())
+			log.WithFields(log.Fields{"type": "LaunchMitMServer"}).Error(err.Error())
 		}
 		wg.Done()
 	}()
