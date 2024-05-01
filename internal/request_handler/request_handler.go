@@ -51,7 +51,7 @@ func RequestHandler(upstreamPort int) func(w http.ResponseWriter, r *http.Reques
 		downstream, err := upgrader.Upgrade(w, r, nil)
 
 		if err != nil {
-			log.WithFields(log.Fields{"type": "WS_Downstream_Upgrade"}).Error(err.Error())
+			log.WithFields(log.Fields{"type": "WS_Downstream_Upgrade"}).Error(fmt.Sprintf("Downstream Websocket upgrade failed, url:%s", r.RequestURI))
 			return
 		} else {
 			log.WithFields(log.Fields{"type": "WS_Downstream_Upgrade"}).Info(fmt.Sprintf("Downstream Websocket upgrade success, url:%s", r.RequestURI))
