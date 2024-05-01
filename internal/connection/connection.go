@@ -7,9 +7,9 @@ import (
 )
 
 type Connection struct {
-	URL        string
-	Upstream   *websocket.Conn
-	Downstream *websocket.Conn
+	URL            string
+	UpstreamConn   *websocket.Conn
+	DownstreamConn *websocket.Conn
 }
 
 var connectionPool = make([]*Connection, 20)

@@ -76,7 +76,7 @@ func RequestHandler(upstreamPort int) func(w http.ResponseWriter, r *http.Reques
 			log.WithFields(log.Fields{"type": "WS_Upstream_Connect"}).Info(fmt.Sprintf("Upstream Websocket connect success, url:%s", wssUpstreamUrl))
 		}
 
-		c := &connection.Connection{URL: r.RequestURI, Upstream: upstream, Downstream: downstream}
+		c := &connection.Connection{URL: r.RequestURI, UpstreamConn: upstream, DownstreamConn: downstream}
 
 		connection.AddConnection(c)
 
