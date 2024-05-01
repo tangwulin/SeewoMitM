@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"sync"
 )
 
 //go:embed server.crt server.key
@@ -163,23 +164,45 @@ func main() {
 		return
 	}
 
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+
 	// 启动服务端
-	log.WithFields(log.Fields{"type": "Server"}).Info(fmt.Sprintf("Listening on port %d", downstreamPort))
+	go func() {
+		log.WithFields(log.Fields{"type": "Server"}).Info(fmt.Sprintf("Listening on port %d", downstreamPort))
 
-	cert, _ := tls.X509KeyPair(certContent, keyContent)
+		cert, _ := tls.X509KeyPair(certContent, keyContent)
 
-	s := &http.Server{
-		Addr:      ":" + strconv.Itoa(downstreamPort),
-		TLSConfig: &tls.Config{Certificates: append([]tls.Certificate{}, cert)},
-	}
+		s := &http.Server{
+			Addr:      ":" + strconv.Itoa(downstreamPort),
+			TLSConfig: &tls.Config{Certificates: append([]tls.Certificate{}, cert)},
+		}
 
-	reqHandler := request_handler.RequestHandler(upstreamPort)
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", reqHandler)
-	s.Handler = mux
-	err = s.ListenAndServeTLS("", "")
+		reqHandler := request_handler.RequestHandler(upstreamPort)
+		mux := http.NewServeMux()
+		mux.HandleFunc("/", reqHandler)
+		s.Handler = mux
+		err = s.ListenAndServeTLS("", "")
 
+		if err != nil {
+			log.WithFields(log.Fields{"type": "Server"}).Error(err.Error())
+		}
+		wg.Done()
+	}()
+
+	err = helper.WriteMitMPortToRegistry(downstreamPort)
 	if err != nil {
-		log.WithFields(log.Fields{"type": "Server"}).Error(err.Error())
+		log.WithFields(log.Fields{"type": "WriteMitMPortToRegistry"}).Error(fmt.Sprintf("Count not to write MitM port to registry: %v", err))
+	} else {
+		log.WithFields(log.Fields{"type": "WriteMitMPortToRegistry"}).Info(fmt.Sprintf("MitM port is written to registry: %d", downstreamPort))
 	}
+
+	err = helper.KillProcessByName("SeewoServiceAssistant.exe")
+	if err != nil {
+		log.WithFields(log.Fields{"type": "RelaunchSeewoServiceAssistant"}).Error(fmt.Sprintf("Count not to kill SeewoServiceAssistant.exe: %v", err))
+	} else {
+		log.WithFields(log.Fields{"type": "RelaunchSeewoServiceAssistant"}).Info("SeewoServiceAssistant.exe is relaunched")
+	}
+
+	wg.Wait()
 }

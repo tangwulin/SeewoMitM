@@ -45,3 +45,13 @@ func StartProcess(path string) error {
 	}
 	return nil
 }
+
+func KillProcessByName(name string) error {
+	cmdStr := fmt.Sprintf("taskkill /f /im %s", name)
+	cmd := exec.Command("cmd", "/c", cmdStr)
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+	return nil
+}
