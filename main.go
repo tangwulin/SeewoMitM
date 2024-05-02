@@ -186,23 +186,39 @@ func main() {
 			for _, v := range cp {
 				if v.URL == "/forward/SeewoHugoHttp/SeewoHugoService" {
 					err := v.DownstreamConn.WriteMessage(websocket.TextMessage, []byte(`{
-		    "data": {
-		        "imageList": [
-		            "D:\\85499466.jpg",
-		            "D:\\532421.jpg",
-		            "D:\\650142.jpg",
-		            "D:\\124177.jpg",
-		            "D:\\1325365.jpg"
-		        ],
-		        "materialSource": "屏保功能来源于中国人口吧",
-		        "pictureSizeType": 1,
-		        "playMode": 0,
-		        "switchInterval": 5,
-		        "textList": []
-		    },
-		    "traceId": "0C89A601-B51D-488D-87EC-5862CE75ABE7",
-		    "url": "/displayScreenSaver"
-		}`))
+    "data": {
+        "imageList": [
+            "D:\\85499466.jpg",
+            "D:\\532421.jpg",
+            "D:\\650142.jpg",
+            "D:\\124177.jpg",
+            "D:\\1325365.jpg"
+        ],
+        "materialSource": "屏保功能来源于中国人口吧",
+        "extraPayload": [
+            "屏保功能来源于中国人口吧",
+            {
+                "type": "image",
+                "path": "D:\\85499466.jpg"
+            }
+        ],
+        "pictureSizeType": 1,
+        "playMode": 0,
+        "switchInterval": 5,
+        "textList": [
+            {
+                "content": "aaa",
+                "provenance": "bbb"
+            },
+            {
+                "content": "foo",
+                "provenance": "bar"
+            }
+        ]
+    },
+    "traceId": "0C89A601-B51D-488D-87EC-5862CE75ABE7",
+    "url": "/displayScreenSaver"
+}`))
 					if err != nil {
 						return
 					}
