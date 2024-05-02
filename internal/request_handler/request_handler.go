@@ -3,6 +3,7 @@ package request_handler
 import (
 	"SeewoMitM/internal/connection"
 	"SeewoMitM/internal/log"
+	"SeewoMitM/internal/mitm"
 	"crypto/tls"
 	"fmt"
 	"github.com/gorilla/websocket"
@@ -87,8 +88,8 @@ func RequestHandler(upstreamPort int) func(w http.ResponseWriter, r *http.Reques
 				mt, payload, err := downstream.ReadMessage()
 				log.WithFields(log.Fields{"type": "WS_Downstream_ReceiveMessage"}).Trace(string(payload))
 				if err != nil {
-					closeChan <- err
 					log.WithFields(log.Fields{"type": "WS_Downstream_Close"}).Info(err.Error())
+					closeChan <- err
 					return
 				}
 				upload <- wsMessage{mt, payload}
@@ -102,8 +103,8 @@ func RequestHandler(upstreamPort int) func(w http.ResponseWriter, r *http.Reques
 				mt, payload, err := upstream.ReadMessage()
 				log.WithFields(log.Fields{"type": "WS_Upstream_ReceiveMessage"}).Trace(string(payload))
 				if err != nil {
-					closeChan <- err
 					log.WithFields(log.Fields{"type": "WS_Upstream"}).Info(err.Error())
+					closeChan <- err
 					return
 				}
 				download <- wsMessage{mt, payload}
@@ -114,18 +115,26 @@ func RequestHandler(upstreamPort int) func(w http.ResponseWriter, r *http.Reques
 			for {
 				select {
 				case message := <-upload:
-					err := upstream.WriteMessage(message.messageType, message.payload)
-					log.WithFields(log.Fields{"type": "WS_Upstream_Forward"}).Trace(string(message.payload))
+					newPayload := mitm.WebsocketMitM(r.RequestURI, "upstream", message.messageType, message.payload)
+					if newPayload == nil {
+						continue
+					}
+					err := upstream.WriteMessage(message.messageType, newPayload)
+					log.WithFields(log.Fields{"type": "WS_Upstream_Forward"}).Trace(string(newPayload))
 					if err != nil {
-						closeChan <- err
 						upstream.Close()
+						closeChan <- err
 					}
 				case message := <-download:
-					err := downstream.WriteMessage(message.messageType, message.payload)
+					newPayload := mitm.WebsocketMitM(r.RequestURI, "downstream", message.messageType, message.payload)
+					if newPayload == nil {
+						continue
+					}
+					err := downstream.WriteMessage(message.messageType, newPayload)
 					log.WithFields(log.Fields{"type": "WS_Downstream_Forward"}).Trace(string(message.payload))
 					if err != nil {
-						closeChan <- err
 						downstream.Close()
+						closeChan <- err
 					}
 				case _ = <-closeChan:
 					return
