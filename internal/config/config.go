@@ -10,11 +10,24 @@ type Config struct {
 	// 屏幕保护劫持内容
 	ScreenSaverHijackContent []ScreenSaverHijackContent `json:"screenSaverHijackContent"`
 
+	// 屏幕保护右下角来源显示
+	ScreenSaverSource string `json:"screenSaverSource"`
+
 	// 屏幕保护触发时间
 	ScreenSaverEmitTime int `json:"screenSaverEmitTime" default:"600"`
 }
 
 type ScreenSaverHijackMode int32
+
+type ScreenSaverHijackContent struct {
+	Type           ScreenSaverHijackContentType `json:"type"`
+	Path           string                       `json:"path,omitempty"`
+	RequirePreload bool                         `json:"requirePreload,omitempty"`
+	EntryPoint     string                       `json:"entryPoint,omitempty"`
+	ServePath      string                       `json:"servePath,omitempty"`
+	SpineVersion   string                       `json:"spineVersion,omitempty"`
+	SpineConfig    interface{}                  `json:"spineConfig,omitempty"`
+}
 
 const (
 	ScreenSaverHijackModeOff ScreenSaverHijackMode = iota
@@ -22,49 +35,12 @@ const (
 	ScreenSaverHijackModeReplaceAll
 )
 
-type ScreenSaverHijackContent struct {
-	ScreenSaverHijackHTMLContent
-	ScreenSaverHijackImageContent
-	ScreenSaverHijackVideoContent
-	ScreenSaverHijackSpineContent
-	ScreenSaverHijackImageDirectoryContent
-}
-
 type ScreenSaverHijackContentType string
 
 const (
-	HTML           ScreenSaverHijackContentType = "html"
-	Image          ScreenSaverHijackContentType = "image"
-	Video          ScreenSaverHijackContentType = "video"
-	Spine          ScreenSaverHijackContentType = "spine"
-	ImageDirectory ScreenSaverHijackContentType = "imageDirectory"
+	HTMLScreenSaverHijackContent           ScreenSaverHijackContentType = "html"
+	ImageScreenSaverHijackContent          ScreenSaverHijackContentType = "image"
+	VideoScreenSaverHijackContent          ScreenSaverHijackContentType = "video"
+	SpineScreenSaverHijackContent          ScreenSaverHijackContentType = "spine"
+	ImageDirectoryScreenSaverHijackContent ScreenSaverHijackContentType = "imageDirectory"
 )
-
-type ScreenSaverHijackHTMLContent struct {
-	Type       ScreenSaverHijackContentType `json:"type" default:"html"`
-	EntryPoint string                       `json:"entryPoint"`
-	ServePath  string                       `json:"servePath"`
-}
-
-type ScreenSaverHijackImageContent struct {
-	Type           ScreenSaverHijackContentType `json:"type" default:"image"`
-	Path           string                       `json:"path"`
-	RequirePreload bool                         `json:"requirePreload" default:"true"`
-}
-
-type ScreenSaverHijackVideoContent struct {
-	Type           ScreenSaverHijackContentType `json:"type" default:"video"`
-	Path           string                       `json:"path"`
-	RequirePreload bool                         `json:"requirePreload" default:"true"`
-}
-
-type ScreenSaverHijackSpineContent struct {
-	Type         ScreenSaverHijackContentType `json:"type" default:"spine"`
-	SpineVersion string                       `json:"spineVersion" default:"3.8"`
-	SpineConfig  string                       `json:"spineConfig"`
-}
-
-type ScreenSaverHijackImageDirectoryContent struct {
-	Type ScreenSaverHijackContentType `json:"type" default:"imageDirectory"`
-	Path string                       `json:"path"`
-}
