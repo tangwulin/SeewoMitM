@@ -15,32 +15,7 @@ type Config struct {
 
 	// 屏幕保护触发时间
 	ScreenSaverEmitTime int `json:"screenSaverEmitTime" default:"600"`
+
+	// MitM配置
+	MitM *MitMConfig `json:"mitm,omitempty"`
 }
-
-type ScreenSaverHijackMode int32
-
-type ScreenSaverHijackContent struct {
-	Type           ScreenSaverHijackContentType `json:"type"`
-	Path           string                       `json:"path,omitempty"`
-	RequirePreload bool                         `json:"requirePreload,omitempty"`
-	EntryPoint     string                       `json:"entryPoint,omitempty"`
-	ServePath      string                       `json:"servePath,omitempty"`
-	SpineVersion   string                       `json:"spineVersion,omitempty"`
-	SpineConfig    interface{}                  `json:"spineConfig,omitempty"`
-}
-
-const (
-	ScreenSaverHijackModeOff ScreenSaverHijackMode = iota
-	ScreenSaverHijackModeAdd
-	ScreenSaverHijackModeReplaceAll
-)
-
-type ScreenSaverHijackContentType string
-
-const (
-	HTMLScreenSaverHijackContent           ScreenSaverHijackContentType = "html"
-	ImageScreenSaverHijackContent          ScreenSaverHijackContentType = "image"
-	VideoScreenSaverHijackContent          ScreenSaverHijackContentType = "video"
-	SpineScreenSaverHijackContent          ScreenSaverHijackContentType = "spine"
-	ImageDirectoryScreenSaverHijackContent ScreenSaverHijackContentType = "imageDirectory"
-)
