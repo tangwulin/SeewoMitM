@@ -84,6 +84,8 @@ func main() {
 		return
 	}
 
+	helper.SetConfig(*configs)
+
 	// 检测有没有指定日志文件路径
 	if *logFilePathPtr != "" {
 		// 检查日志文件路径是否存在
