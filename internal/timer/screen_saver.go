@@ -2,14 +2,17 @@ package timer
 
 import (
 	"SeewoMitM/internal/log"
+	"fmt"
 	"github.com/lextoumbourou/idle"
 	"time"
 )
 
 func LaunchScreenSaverTimer(timeout time.Duration, callback func()) error {
+	log.WithFields(log.Fields{"type": "ScreenSaverTimer", "timeout": timeout}).Info("launching ScreenSaverTimer")
 	for {
 		idleTime, err := idle.Get()
 		if err != nil {
+			log.WithFields(log.Fields{"type": "ScreenSaverTimer", "timeout": timeout}).Error(fmt.Sprintf("failed to get idle time: %v", err))
 			return err
 		}
 		log.WithFields(log.Fields{"type": "ScreenSaverTimer", "timeout": timeout}).Info("idleTime:", idleTime)
