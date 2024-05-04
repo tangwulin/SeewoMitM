@@ -5,7 +5,7 @@ import (
 	"SeewoMitM/internal/connection"
 	"SeewoMitM/internal/helper"
 	"SeewoMitM/internal/log"
-	"SeewoMitM/internal/server"
+	"SeewoMitM/internal/services"
 	"SeewoMitM/internal/timer"
 	"embed"
 	"encoding/json"
@@ -159,9 +159,9 @@ func main() {
 
 	// 启动服务端
 	go func() {
-		err = server.LaunchMitMServer(downstreamPort, upstreamPort, certFiles)
+		err = services.LaunchMitMService(downstreamPort, upstreamPort, certFiles)
 		if err != nil {
-			log.WithFields(log.Fields{"type": "LaunchMitMServer"}).Error(err.Error())
+			log.WithFields(log.Fields{"type": "LaunchMitMService"}).Error(err.Error())
 		}
 		wg.Done()
 	}()

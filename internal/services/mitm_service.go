@@ -1,4 +1,4 @@
-package server
+package services
 
 import (
 	"SeewoMitM/internal/log"
@@ -10,7 +10,7 @@ import (
 	"strconv"
 )
 
-func LaunchMitMServer(downstreamPort int, upstreamPort int, certFiles embed.FS) error {
+func LaunchMitMService(downstreamPort int, upstreamPort int, certFiles embed.FS) error {
 	// 读取证书文件
 	certContent, err := certFiles.ReadFile("server.crt")
 	if err != nil {
