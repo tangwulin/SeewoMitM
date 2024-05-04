@@ -3,7 +3,7 @@ package request_handler
 import (
 	"SeewoMitM/internal/connection"
 	"SeewoMitM/internal/log"
-	"SeewoMitM/internal/mitm"
+	"SeewoMitM/internal/middleware"
 	"crypto/tls"
 	"fmt"
 	"github.com/gorilla/websocket"
@@ -115,7 +115,9 @@ func RequestHandler(upstreamPort int) func(w http.ResponseWriter, r *http.Reques
 			for {
 				select {
 				case message := <-upload:
-					newPayload := mitm.WebsocketMitM(r.RequestURI, "upstream", message.messageType, message.payload)
+					//newPayload := middleware.WebsocketMitM(r.RequestURI, "upstream", message.messageType, message.payload)
+					//newPayload := middleware.ScreenSaverMitM(r.RequestURI, "upstream", message.messageType, message.payload)
+					newPayload := message.payload
 					if newPayload == nil {
 						continue
 					}
@@ -126,7 +128,8 @@ func RequestHandler(upstreamPort int) func(w http.ResponseWriter, r *http.Reques
 						closeChan <- err
 					}
 				case message := <-download:
-					newPayload := mitm.WebsocketMitM(r.RequestURI, "downstream", message.messageType, message.payload)
+					//newPayload := middleware.WebsocketMitM(r.RequestURI, "upstream", message.messageType, message.payload)
+					newPayload := middleware.ScreenSaverMitM(r.RequestURI, "upstream", message.messageType, message.payload)
 					if newPayload == nil {
 						continue
 					}

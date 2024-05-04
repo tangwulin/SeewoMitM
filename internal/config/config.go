@@ -17,5 +17,8 @@ type Config struct {
 	ScreenSaverEmitTime int `json:"screenSaverEmitTime" default:"600"`
 
 	// MitM配置
-	MitM *MitMConfig `json:"mitm,omitempty"`
+	MitM *MitMConfig `json:"middleware,omitempty"`
+
+	// 缓存配置
+	Cache *CacheConfig `json:"cache,omitempty"`
 }

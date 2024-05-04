@@ -1,6 +1,8 @@
 package helper
 
-import "SeewoMitM/internal/config"
+import (
+	"SeewoMitM/internal/config"
+)
 
 var globalConfig = config.Config{}
 

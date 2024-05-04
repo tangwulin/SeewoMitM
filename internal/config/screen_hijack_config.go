@@ -1,5 +1,7 @@
 package config
 
+import "SeewoMitM/internal/spine"
+
 type ScreenSaverHijackMode int32
 
 type ScreenSaverHijackContent struct {
@@ -9,7 +11,7 @@ type ScreenSaverHijackContent struct {
 	EntryPoint     string                       `json:"entryPoint,omitempty"`
 	ServePath      string                       `json:"servePath,omitempty"`
 	SpineVersion   string                       `json:"spineVersion,omitempty"`
-	SpineConfig    interface{}                  `json:"spineConfig,omitempty"`
+	SpineConfig    *spine.Options               `json:"spineConfig,omitempty"`
 }
 
 const (

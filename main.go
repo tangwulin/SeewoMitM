@@ -2,21 +2,18 @@ package main
 
 import (
 	"SeewoMitM/internal/config"
-	"SeewoMitM/internal/connection"
+	"SeewoMitM/internal/downloader"
 	"SeewoMitM/internal/helper"
 	"SeewoMitM/internal/log"
 	"SeewoMitM/internal/server"
-	"SeewoMitM/internal/timer"
 	"embed"
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 	"io"
 	"os"
 	"sync"
-	"time"
 )
 
 //go:embed server.crt server.key
@@ -118,7 +115,7 @@ func main() {
 	// 初始化日志
 	logFile := helper.GetLogFile(logDir)
 	log.InitGlobal(
-		log.NewLogrusAdapt(&logrus.Logger{Out: io.MultiWriter(os.Stdout, logFile),
+		log.NewLogrusAdapt(&logrus.Logger{Out: io.MultiWriter(os.Stderr, logFile),
 			Formatter: new(logrus.TextFormatter),
 			Hooks:     make(logrus.LevelHooks), Level: logrus.Level(log.FindLevel(logLevel))}))
 
@@ -147,7 +144,7 @@ func main() {
 	if *downstreamPortPtr != 0 {
 		downstreamPort = *downstreamPortPtr
 	} else {
-		downstreamPort, err = helper.GetAvailablePort(14514)
+		downstreamPort, err = helper.GetAvailablePort(11451)
 		if err != nil {
 			log.WithFields(log.Fields{"type": "GetAvailablePort"}).Error(err.Error())
 			return
@@ -155,14 +152,40 @@ func main() {
 	}
 	log.WithFields(log.Fields{"type": "Downstream"}).Info(fmt.Sprintf("downstream port:%d", downstreamPort))
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
+	// 解析配置文件里面的屏保内容
 
-	// 启动服务端
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+
+	// 启动MitM服务
 	go func() {
-		err = server.LaunchMitMServer(downstreamPort, upstreamPort, certFiles)
+		err := server.LaunchMitMServer(downstreamPort, upstreamPort, certFiles)
 		if err != nil {
 			log.WithFields(log.Fields{"type": "LaunchMitMServer"}).Error(err.Error())
+		}
+		wg.Done()
+	}()
+
+	// 启动下载器
+	go func() {
+		downloader.StartDownloader()
+	}()
+
+	//go func() {
+	//	screensaver.LoadScreenSaverConfig(configs)
+	//}()
+
+	// 启动资源服务器
+	go func() {
+		port, err := helper.GetAvailablePort(14514)
+		if err != nil {
+			log.WithFields(log.Fields{"type": "ResourceServer"}).Errorf("Get available port failed:%v", err.Error())
+			log.WithFields(log.Fields{"type": "ResourceServer"}).Error("Cache server start failed")
+		}
+		config.SetResourceServerAddr(fmt.Sprintf("http://localhost:%d/getResource", port))
+		err = server.LaunchResourceServer(port)
+		if err != nil {
+			log.WithFields(log.Fields{"type": "LaunchResourceServer"}).Error(err.Error())
 		}
 		wg.Done()
 	}()
@@ -182,55 +205,55 @@ func main() {
 	}
 
 	//启动屏保定时器
-	go func() {
-		err := timer.LaunchScreenSaverTimer(time.Duration(configs.ScreenSaverEmitTime)*time.Second, func() {
-			cp := *connection.GetConnectionPool()
-			for _, v := range cp {
-				if v.URL == "/forward/SeewoHugoHttp/SeewoHugoService" {
-					err := v.DownstreamConn.WriteMessage(websocket.TextMessage, []byte(`{
-    "data": {
-        "imageList": [
-            "D:\\85499466.jpg",
-            "D:\\532421.jpg",
-            "D:\\650142.jpg",
-            "D:\\124177.jpg",
-            "D:\\1325365.jpg"
-        ],
-        "materialSource": "屏保功能来源于中国人口吧",
-        "extraPayload": [
-            "屏保功能来源于中国人口吧",
-            {
-                "type": "image",
-                "path": "D:\\85499466.jpg"
-            }
-        ],
-        "pictureSizeType": 1,
-        "playMode": 0,
-        "switchInterval": 5,
-        "textList": [
-            {
-                "content": "aaa",
-                "provenance": "bbb"
-            },
-            {
-                "content": "foo",
-                "provenance": "bar"
-            }
-        ]
-    },
-    "traceId": "0C89A601-B51D-488D-87EC-5862CE75ABE7",
-    "url": "/displayScreenSaver"
-}`))
-					if err != nil {
-						return
-					}
-				}
-			}
-		})
-		if err != nil {
-			return
-		}
-	}()
+	//	go func() {
+	//		err := timer.LaunchScreenSaverTimer(time.Duration(configs.ScreenSaverEmitTime)*time.Second, func() {
+	//			cp := *connection.GetConnectionPool()
+	//			for _, v := range cp {
+	//				if v.URL == "/forward/SeewoHugoHttp/SeewoHugoService" {
+	//					err := v.DownstreamConn.WriteMessage(websocket.TextMessage, []byte(`{
+	//    "data": {
+	//        "imageList": [
+	//            "D:\\85499466.jpg",
+	//            "D:\\532421.jpg",
+	//            "D:\\650142.jpg",
+	//            "D:\\124177.jpg",
+	//            "D:\\1325365.jpg"
+	//        ],
+	//        "materialSource": "屏保功能来源于中国人口吧",
+	//        "extraPayload": [
+	//            "屏保功能来源于中国人口吧",
+	//            {
+	//                "type": "image",
+	//                "path": "D:\\85499466.jpg"
+	//            }
+	//        ],
+	//        "pictureSizeType": 1,
+	//        "playMode": 0,
+	//        "switchInterval": 5,
+	//        "textList": [
+	//            {
+	//                "content": "aaa",
+	//                "provenance": "bbb"
+	//            },
+	//            {
+	//                "content": "foo",
+	//                "provenance": "bar"
+	//            }
+	//        ]
+	//    },
+	//    "traceId": "0C89A601-B51D-488D-87EC-5862CE75ABE7",
+	//    "url": "/displayScreenSaver"
+	//}`))
+	//					if err != nil {
+	//						return
+	//					}
+	//				}
+	//			}
+	//		})
+	//		if err != nil {
+	//			return
+	//		}
+	//	}()
 
 	wg.Wait()
 }
