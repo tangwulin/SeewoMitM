@@ -57,10 +57,12 @@ func main() {
 			defer file.Close()
 
 			defaultConfig := config.Config{
-				LogLevel:                 "info",
-				ScreenSaverHijackMode:    config.ScreenSaverHijackModeReplaceAll,
-				ScreenSaverHijackContent: make([]config.ScreenSaverHijackContent, 0),
-				ScreenSaverEmitTime:      600}
+				LogLevel: "info",
+				ScreensaverConfig: &config.ScreensaverConfig{
+					HijackMode: "replace",
+					Contents:   []config.ScreensaverContent{},
+				},
+			}
 
 			encoder := json.NewEncoder(file)
 			encoder.SetIndent("", "\t")
@@ -183,7 +185,7 @@ func main() {
 
 	//启动屏保定时器
 	go func() {
-		err := timer.LaunchScreenSaverTimer(time.Duration(configs.ScreenSaverEmitTime)*time.Second, func() {
+		err := timer.LaunchScreenSaverTimer(time.Duration(configs.ScreensaverConfig.EmitTime)*time.Second, func() {
 			cp := *connection.GetConnectionPool()
 			for _, v := range cp {
 				if v.URL == "/forward/SeewoHugoHttp/SeewoHugoService" {
