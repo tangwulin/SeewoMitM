@@ -1,5 +1,10 @@
 package config
 
+import (
+	"SeewoMitM/internal/spine"
+	"strings"
+)
+
 type ScreensaverConfig struct {
 	// 屏幕保护劫持模式
 	HijackMode string `json:"hijackMode"`
@@ -52,7 +57,11 @@ type ScreensaverContent struct {
 
 	/* 只有Spine有的 */
 	// SpinePlayer的配置
-	SpinePlayerConfig *SpinePlayerConfig `json:"spinePlayerConfig,omitempty"`
+	SpinePlayerConfig *spine.SpinePlayerConfig `json:"spinePlayerConfig,omitempty"`
+}
+
+func (content ScreensaverContent) IsRequirePreload() bool {
+	return content.RequirePreload && strings.HasPrefix(content.Path, "http")
 }
 
 func NewScreensaverContent() *ScreensaverContent {
@@ -81,7 +90,7 @@ func NewScreensaverVideoContent(path string, requirePreload bool, fit string, mu
 	}
 }
 
-func NewScreensaverSpineContent(path string, requirePreload bool, spinePlayerConfig *SpinePlayerConfig, duration int) *ScreensaverContent {
+func NewScreensaverSpineContent(path string, requirePreload bool, spinePlayerConfig *spine.SpinePlayerConfig, duration int) *ScreensaverContent {
 	return &ScreensaverContent{
 		Type:              "spine",
 		Path:              path,
