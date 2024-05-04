@@ -1,4 +1,4 @@
-package services
+package mitm
 
 import (
 	"SeewoMitM/internal/log"
