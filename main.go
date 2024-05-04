@@ -3,9 +3,12 @@ package main
 import (
 	"SeewoMitM/internal/config"
 	"SeewoMitM/internal/connection"
+	"SeewoMitM/internal/downloader"
 	"SeewoMitM/internal/helper"
 	"SeewoMitM/internal/log"
-	"SeewoMitM/internal/services"
+	"SeewoMitM/internal/mitm"
+	"SeewoMitM/internal/resource"
+	"SeewoMitM/internal/screensaver"
 	"SeewoMitM/internal/timer"
 	"embed"
 	"encoding/json"
@@ -154,12 +157,16 @@ func main() {
 	}
 	log.WithFields(log.Fields{"type": "Downstream"}).Info(fmt.Sprintf("downstream port:%d", downstreamPort))
 
+	downloader.LaunchDownloader(2)
+	screensaver.LoadScreensaverData()
+	resource.LaunchResourceService(14515, "./resource")
+
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 
 	// 启动服务端
 	go func() {
-		err = services.LaunchMitMService(downstreamPort, upstreamPort, certFiles)
+		err = mitm.LaunchMitMService(downstreamPort, upstreamPort, certFiles)
 		if err != nil {
 			log.WithFields(log.Fields{"type": "LaunchMitMService"}).Error(err.Error())
 		}
