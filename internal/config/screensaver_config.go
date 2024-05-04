@@ -15,7 +15,12 @@ type ScreensaverConfig struct {
 }
 
 func NewScreensaverConfig() *ScreensaverConfig {
-	return &ScreensaverConfig{}
+	return &ScreensaverConfig{
+		HijackMode: "replace",
+		Contents:   []ScreensaverContent{},
+		Source:     "屏保功能来源于SeewoMitM",
+		EmitTime:   600,
+	}
 }
 
 type ScreensaverContent struct {

@@ -57,11 +57,8 @@ func main() {
 			defer file.Close()
 
 			defaultConfig := config.Config{
-				LogLevel: "info",
-				ScreensaverConfig: &config.ScreensaverConfig{
-					HijackMode: "replace",
-					Contents:   []config.ScreensaverContent{},
-				},
+				LogLevel:          "info",
+				ScreensaverConfig: config.NewScreensaverConfig(),
 			}
 
 			encoder := json.NewEncoder(file)
