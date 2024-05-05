@@ -15,19 +15,19 @@ func LaunchScreenSaverTimer(timeout time.Duration, callback func()) error {
 			log.WithFields(log.Fields{"type": "ScreenSaverTimer", "timeout": timeout}).Error(fmt.Sprintf("failed to get idle time: %v", err))
 			return err
 		}
-		log.WithFields(log.Fields{"type": "ScreenSaverTimer", "timeout": timeout}).Info("idleTime:", idleTime)
+		log.WithFields(log.Fields{"type": "ScreenSaverTimer", "timeout": timeout}).Trace("idleTime:", idleTime)
 		if idleTime >= timeout {
-			log.WithFields(log.Fields{"type": "ScreenSaverTimer", "timeout": timeout}).Info("timeout reached!")
+			log.WithFields(log.Fields{"type": "ScreenSaverTimer", "timeout": timeout}).Trace("timeout reached!")
 			callback()
-			log.WithFields(log.Fields{"type": "ScreenSaverTimer", "timeout": timeout}).Info("nextWait:", timeout)
+			log.WithFields(log.Fields{"type": "ScreenSaverTimer", "timeout": timeout}).Trace("nextWait:", timeout)
 			time.Sleep(timeout)
 		} else {
 			nextWait := (timeout - idleTime) / 2
 			if nextWait > 5*time.Second {
-				log.WithFields(log.Fields{"type": "ScreenSaverTimer", "timeout": timeout}).Info("nextWait:", nextWait)
+				log.WithFields(log.Fields{"type": "ScreenSaverTimer", "timeout": timeout}).Trace("nextWait:", nextWait)
 				time.Sleep(nextWait)
 			} else {
-				log.WithFields(log.Fields{"type": "ScreenSaverTimer", "timeout": timeout}).Info("nextWait: 1s")
+				log.WithFields(log.Fields{"type": "ScreenSaverTimer", "timeout": timeout}).Trace("nextWait: 1s")
 				time.Sleep(1 * time.Second)
 			}
 			continue
