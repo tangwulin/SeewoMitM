@@ -90,10 +90,9 @@ func NewScreensaverVideoContent(path string, requirePreload bool, fit string, mu
 	}
 }
 
-func NewScreensaverSpineContent(path string, requirePreload bool, spinePlayerConfig *spine.SpinePlayerConfig, duration int) *ScreensaverContent {
+func NewScreensaverSpineContent(spinePlayerConfig *spine.SpinePlayerConfig, requirePreload bool, duration int) *ScreensaverContent {
 	return &ScreensaverContent{
 		Type:              "spine",
-		Path:              path,
 		RequirePreload:    requirePreload,
 		SpinePlayerConfig: spinePlayerConfig,
 		Duration:          duration,
