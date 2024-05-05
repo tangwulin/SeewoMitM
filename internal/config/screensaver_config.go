@@ -6,25 +6,47 @@ import (
 )
 
 type ScreensaverConfig struct {
-	// 屏幕保护劫持模式
+	// 劫持模式
 	HijackMode string `json:"hijackMode"`
 
-	// 屏幕保护劫持内容
+	// 劫持内容
 	Contents []ScreensaverContent `json:"contents"`
 
-	// 屏幕保护右下角来源显示
+	// 右下角来源显示
 	Source string `json:"source"`
 
-	// 屏幕保护触发时间
+	// 触发时间
 	EmitTime int `json:"emitTime" default:"600"`
+
+	// 内容适应模式
+	Fit string `json:"fit"`
+
+	// 轮播模式
+	PlayMode string `json:"playMode"`
+
+	// 轮播间隔（单位：毫秒）
+	SwitchInterval int `json:"switchInterval"`
+
+	// 文字列表
+	TextList []struct {
+		Content    string `json:"content"`
+		Provenance string `json:"provenance"`
+	} `json:"textList"`
 }
 
 func NewScreensaverConfig() *ScreensaverConfig {
 	return &ScreensaverConfig{
-		HijackMode: "replace",
-		Contents:   []ScreensaverContent{},
-		Source:     "屏保功能来源于SeewoMitM",
-		EmitTime:   600,
+		HijackMode:     "replace",
+		Contents:       []ScreensaverContent{},
+		Source:         "屏保功能来源于SeewoMitM",
+		EmitTime:       600,
+		Fit:            "contain",
+		PlayMode:       "sequence",
+		SwitchInterval: 5000,
+		TextList: []struct {
+			Content    string `json:"content"`
+			Provenance string `json:"provenance"`
+		}{},
 	}
 }
 

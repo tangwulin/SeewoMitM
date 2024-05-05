@@ -8,11 +8,16 @@ import (
 	"strings"
 )
 
-var screensaverDataContents DataContent
+var screensaverContent DataContent
 
 type DataContent struct {
-	ImageList    []string     `json:"imageList"`
-	ExtraPayload ExtraPayload `json:"extraPayload,omitempty"`
+	ImageList      []string      `json:"imageList"`
+	ExtraPayload   *ExtraPayload `json:"extraPayload,omitempty"`
+	Source         string        `json:"source"`
+	Fit            string        `json:"fit"`
+	PlayMode       string        `json:"playMode"`
+	SwitchInterval int           `json:"switchInterval"`
+	TextList       []TextItem    `json:"textList"`
 }
 
 func ParseScreensaverContent() DataContent {
@@ -63,9 +68,23 @@ func ParseScreensaverContent() DataContent {
 		}
 	}
 
+	textList := make([]TextItem, 0)
+	// golang是没有鸭子类型吗？？？
+	for _, t := range gc.ScreensaverConfig.TextList {
+		textList = append(textList, TextItem{
+			Content:    t.Content,
+			Provenance: t.Provenance,
+		})
+	}
+
 	return DataContent{
-		ImageList:    imgList,
-		ExtraPayload: ExtraPayload{ScreensaverContent: contents},
+		ImageList:      imgList,
+		ExtraPayload:   &ExtraPayload{ScreensaverContent: contents, ScreensaverSwitchInterval: gc.ScreensaverConfig.SwitchInterval},
+		Source:         gc.ScreensaverConfig.Source,
+		Fit:            gc.ScreensaverConfig.Fit,
+		PlayMode:       gc.ScreensaverConfig.PlayMode,
+		SwitchInterval: gc.ScreensaverConfig.SwitchInterval / 1000,
+		TextList:       textList,
 	}
 }
 
@@ -85,10 +104,10 @@ func GetResourceTrueUrl(url string, requirePreload bool) string {
 	return url
 }
 
-func LoadScreensaverData() {
-	screensaverDataContents = ParseScreensaverContent()
+func LoadScreensaverContent() {
+	screensaverContent = ParseScreensaverContent()
 }
 
-func GetScreensaverData() *DataContent {
-	return &screensaverDataContents
+func GetScreensaverContent() *DataContent {
+	return &screensaverContent
 }

@@ -38,7 +38,7 @@ func LaunchManageServer(port int) error {
 				c.JSON(200, gin.H{
 					"message": "config",
 					"data":    "config",
-					"code":    screensaver.GetScreensaverData(),
+					"code":    screensaver.GetScreensaverContent(),
 				})
 			})
 		}

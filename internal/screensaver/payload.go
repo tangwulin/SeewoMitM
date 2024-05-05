@@ -19,7 +19,8 @@ type Data struct {
 }
 
 type ExtraPayload struct {
-	ScreensaverContent []Content `json:"screensaverContent"`
+	ScreensaverSwitchInterval int       `json:"screensaverSwitchInterval"`
+	ScreensaverContent        []Content `json:"screensaverContent"`
 }
 
 type TextItem struct {
@@ -27,16 +28,26 @@ type TextItem struct {
 	Provenance string `json:"provenance"`
 }
 
-func NewPayload(imageList []string, materialSource string, extraPayload *ExtraPayload, pictureSizeType int, playMode int, switchInterval int, textList []TextItem) *Payload {
+func GetPayload() *Payload {
+	content := GetScreensaverContent()
+
+	var pictureSizeType int
+	switch content.Fit {
+	case "contain":
+		pictureSizeType = 0
+	case "cover":
+		pictureSizeType = 1
+	}
+
 	return &Payload{
 		Data: Data{
-			ImageList:       imageList,
-			MaterialSource:  materialSource,
-			ExtraPayload:    extraPayload,
+			ImageList:       content.ImageList,
+			MaterialSource:  content.Source,
+			ExtraPayload:    content.ExtraPayload,
 			PictureSizeType: pictureSizeType,
-			PlayMode:        playMode,
-			SwitchInterval:  switchInterval,
-			TextList:        textList,
+			PlayMode:        0,
+			SwitchInterval:  content.SwitchInterval,
+			TextList:        content.TextList,
 		},
 		TraceId: uuid.New().String(),
 		Url:     "/displayScreenSaver",
