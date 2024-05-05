@@ -159,7 +159,7 @@ func main() {
 	log.WithFields(log.Fields{"type": "Downstream"}).Info(fmt.Sprintf("downstream port:%d", downstreamPort))
 
 	downloader.LaunchDownloader(2)
-	screensaver.LoadScreensaverData()
+	screensaver.LoadScreensaverContent()
 	resource.LaunchResourceService(14515, "./resource")
 
 	wg := sync.WaitGroup{}
