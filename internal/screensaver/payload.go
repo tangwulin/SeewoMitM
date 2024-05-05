@@ -1,6 +1,9 @@
 package screensaver
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+	"strings"
+)
 
 type Payload struct {
 	Data    Data   `json:"data"`
@@ -49,7 +52,7 @@ func GetPayload() *Payload {
 			SwitchInterval:  content.SwitchInterval,
 			TextList:        content.TextList,
 		},
-		TraceId: uuid.New().String(),
+		TraceId: strings.ToUpper(uuid.New().String()),
 		Url:     "/displayScreenSaver",
 	}
 }
