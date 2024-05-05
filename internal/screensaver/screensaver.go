@@ -15,10 +15,6 @@ type DataContent struct {
 	ExtraPayload ExtraPayload `json:"extraPayload,omitempty"`
 }
 
-type ExtraPayload struct {
-	ScreensaverContent []Content `json:"screensaverContent"`
-}
-
 func ParseScreensaverContent() DataContent {
 	gc := helper.GetConfig()
 	if gc.ScreensaverConfig == nil {
