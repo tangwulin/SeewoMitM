@@ -37,8 +37,8 @@ func LaunchManageServer(port int) error {
 			v1.GET("/config", func(c *gin.Context) {
 				c.JSON(200, gin.H{
 					"message": "config",
-					"data":    "config",
-					"code":    screensaver.GetScreensaverContent(),
+					"data":    screensaver.GetScreensaverContent(),
+					"code":    200,
 				})
 			})
 
