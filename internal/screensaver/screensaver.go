@@ -24,6 +24,7 @@ func ParseScreensaverContent() DataContent {
 	imgList := make([]string, 0)
 	contents := make([]Content, 0)
 
+	//TODO: 资源预加载还需要针对spine进行处理
 	for _, c := range gc.ScreensaverConfig.Contents {
 		switch c.Type {
 		case "image":
@@ -34,7 +35,7 @@ func ParseScreensaverContent() DataContent {
 		case "video":
 			contents = append(contents, *NewVideoContent(GetContentTrueUrl(c), c.Fit, c.Duration))
 		case "spine":
-			// 如果有RawDataURIs就直接使用
+			/*// 如果有RawDataURIs就直接使用
 			if len(c.SpinePlayerConfig.RawDataURIs) > 0 {
 				contents = append(contents, *NewSpineContent(c.Path, c.SpinePlayerConfig, c.Duration))
 				continue
@@ -53,9 +54,9 @@ func ParseScreensaverContent() DataContent {
 
 			if spinePlayerConfig.BackgroundImage != nil && spinePlayerConfig.BackgroundImage.Url != "" {
 				spinePlayerConfig.BackgroundImage.Url = GetResourceTrueUrl(spinePlayerConfig.BackgroundImage.Url, c.RequirePreload)
-			}
+			}*/
 
-			contents = append(contents, *NewSpineContent(c.Path, &spinePlayerConfig, c.Duration))
+			contents = append(contents, *NewSpineContent(c.Path, c.SpinePlayerConfig, c.Duration))
 		default:
 			log.WithFields(log.Fields{"type": "ParseScreensaverContent"}).Error("unknown content type, content will be ignored:", c)
 			continue
