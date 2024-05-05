@@ -6,6 +6,7 @@ import (
 	"SeewoMitM/internal/downloader"
 	"SeewoMitM/internal/helper"
 	"SeewoMitM/internal/log"
+	"SeewoMitM/internal/manage"
 	"SeewoMitM/internal/mitm"
 	"SeewoMitM/internal/resource"
 	"SeewoMitM/internal/screensaver"
@@ -162,7 +163,16 @@ func main() {
 	resource.LaunchResourceService(14515, "./resource")
 
 	wg := sync.WaitGroup{}
-	wg.Add(1)
+	wg.Add(2)
+
+	// 启动管理服务
+	go func() {
+		err = manage.LaunchManageServer(14516)
+		if err != nil {
+			log.WithFields(log.Fields{"type": "LaunchManageServer"}).Error(err.Error())
+		}
+		wg.Done()
+	}()
 
 	// 启动服务端
 	go func() {

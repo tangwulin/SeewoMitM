@@ -38,7 +38,6 @@ func ParseScreensaverContent() DataContent {
 		case "video":
 			contents = append(contents, *NewVideoContent(GetContentTrueUrl(c), c.Fit, c.Duration))
 		case "spine":
-
 			// 如果有RawDataURIs就直接使用
 			if len(c.SpinePlayerConfig.RawDataURIs) > 0 {
 				contents = append(contents, *NewSpineContent(c.Path, c.SpinePlayerConfig, c.Duration))
@@ -47,23 +46,19 @@ func ParseScreensaverContent() DataContent {
 
 			// 如果没有RawDataURIs就使用AtlasUrl和JsonUrl
 			spinePlayerConfig := *c.SpinePlayerConfig
-			var atlasUrl string
-			if spinePlayerConfig.AtlasUrl != "" {
-				atlasUrl = GetResourceTrueUrl(spinePlayerConfig.AtlasUrl, c.RequirePreload)
-			}
-			var jsonUrl string
-			if spinePlayerConfig.JsonUrl != "" {
-				jsonUrl = GetResourceTrueUrl(spinePlayerConfig.JsonUrl, c.RequirePreload)
-			}
-			var backgroundImageUrl string
-			if spinePlayerConfig.BackgroundImage.Url != "" {
-				backgroundImageUrl = GetResourceTrueUrl(spinePlayerConfig.BackgroundImage.Url, c.RequirePreload)
+
+			if &spinePlayerConfig.AtlasUrl != nil && spinePlayerConfig.AtlasUrl != "" {
+				spinePlayerConfig.AtlasUrl = GetResourceTrueUrl(spinePlayerConfig.AtlasUrl, c.RequirePreload)
 			}
 
-			// 写回去
-			spinePlayerConfig.AtlasUrl = atlasUrl
-			spinePlayerConfig.JsonUrl = jsonUrl
-			spinePlayerConfig.BackgroundImage.Url = backgroundImageUrl
+			if &spinePlayerConfig.JsonUrl != nil && spinePlayerConfig.JsonUrl != "" {
+				spinePlayerConfig.JsonUrl = GetResourceTrueUrl(spinePlayerConfig.JsonUrl, c.RequirePreload)
+			}
+
+			if spinePlayerConfig.BackgroundImage != nil && spinePlayerConfig.BackgroundImage.Url != "" {
+				spinePlayerConfig.BackgroundImage.Url = GetResourceTrueUrl(spinePlayerConfig.BackgroundImage.Url, c.RequirePreload)
+			}
+
 			contents = append(contents, *NewSpineContent(c.Path, &spinePlayerConfig, c.Duration))
 		default:
 			log.WithFields(log.Fields{"type": "ParseScreensaverContent"}).Error("unknown content type, content will be ignored:", c)
