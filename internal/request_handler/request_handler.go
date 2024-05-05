@@ -52,10 +52,10 @@ func RequestHandler(upstreamPort int) func(w http.ResponseWriter, r *http.Reques
 		downstream, err := upgrader.Upgrade(w, r, nil)
 
 		if err != nil {
-			log.WithFields(log.Fields{"type": "WS_Downstream_Upgrade"}).Error(fmt.Sprintf("Downstream Websocket upgrade failed, url:%s", r.RequestURI))
+			log.WithFields(log.Fields{"type": "WS_Downstream_Upgrade"}).Errorf("Downstream Websocket upgrade failed, url:%s", r.RequestURI)
 			return
 		} else {
-			log.WithFields(log.Fields{"type": "WS_Downstream_Upgrade"}).Info(fmt.Sprintf("Downstream Websocket upgrade success, url:%s", r.RequestURI))
+			log.WithFields(log.Fields{"type": "WS_Downstream_Upgrade"}).Tracef("Downstream Websocket upgrade success, url:%s", r.RequestURI)
 		}
 
 		wssUpstreamUrl := fmt.Sprintf("wss://localhost:%d%s", upstreamPort, r.RequestURI)
@@ -73,7 +73,7 @@ func RequestHandler(upstreamPort int) func(w http.ResponseWriter, r *http.Reques
 			downstream.Close()
 			return
 		} else {
-			log.WithFields(log.Fields{"type": "WS_Upstream_Connect"}).Info(fmt.Sprintf("Upstream Websocket connect success, url:%s", wssUpstreamUrl))
+			log.WithFields(log.Fields{"type": "WS_Upstream_Connect"}).Tracef("Upstream Websocket connect success, url:%s", wssUpstreamUrl)
 		}
 
 		c := &connection.Connection{URL: r.RequestURI, UpstreamConn: upstream, DownstreamConn: downstream}
