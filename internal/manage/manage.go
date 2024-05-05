@@ -41,6 +41,14 @@ func LaunchManageServer(port int) error {
 					"code":    screensaver.GetScreensaverContent(),
 				})
 			})
+
+			v1.GET("/getScreensaverPayload", func(c *gin.Context) {
+				c.JSON(200, gin.H{
+					"message": "getScreensaverPayload",
+					"data":    screensaver.GetPayload(),
+					"code":    200,
+				})
+			})
 		}
 	}
 
