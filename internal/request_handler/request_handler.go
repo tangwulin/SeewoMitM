@@ -3,14 +3,18 @@ package request_handler
 import (
 	"SeewoMitM/internal/connection"
 	"SeewoMitM/internal/log"
+	"SeewoMitM/internal/screensaver"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"io"
 	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strings"
 )
 
 var upgrader = websocket.Upgrader{
@@ -121,8 +125,15 @@ func RequestHandler(upstreamPort int) func(w http.ResponseWriter, r *http.Reques
 						upstream.Close()
 					}
 				case message := <-download:
-					err := downstream.WriteMessage(message.messageType, message.payload)
-					log.WithFields(log.Fields{"type": "WS_Downstream_Forward"}).Trace(string(message.payload))
+					var newPayload *[]byte
+					if r.RequestURI == "/forward/SeewoHugoHttp/SeewoHugoService" {
+						newPayload = ModifyPayload(&message.payload)
+						log.WithFields(log.Fields{"type": "WS_Downstream_Forward"}).Warn(string(*newPayload))
+					} else {
+						newPayload = &message.payload
+					}
+					err := downstream.WriteMessage(message.messageType, *newPayload)
+					log.WithFields(log.Fields{"type": "WS_Downstream_Forward"}).Trace(string(*newPayload))
 					if err != nil {
 						closeChan <- err
 						downstream.Close()
@@ -133,4 +144,79 @@ func RequestHandler(upstreamPort int) func(w http.ResponseWriter, r *http.Reques
 			}
 		}()
 	}
+}
+
+func ModifyPayload(payload *[]byte) *[]byte {
+	originalPayload := make(map[string]interface{})
+	err := json.Unmarshal(*payload, &originalPayload)
+	if err != nil {
+		log.WithFields(log.Fields{"type": "ModifyPayload"}).Error("failed to unmarshal payload")
+		return payload
+	}
+
+	// 屏保
+	if url, exist := originalPayload["url"]; exist && url == "/displayScreenSaver" {
+		content := screensaver.GetScreensaverContent()
+		var pictureSizeType int
+		switch content.Fit {
+		case "contain":
+			pictureSizeType = 0
+		case "cover":
+			pictureSizeType = 1
+		}
+
+		if len(content.ExtraPayload.ScreensaverContent) == 0 {
+			return payload
+		}
+
+		newPayload := screensaver.Payload{}
+		err := json.Unmarshal(*payload, &newPayload)
+		if err != nil {
+			log.WithFields(log.Fields{"type": "ModifyPayload"}).Error("failed to unmarshal new payload", err.Error())
+			return payload
+		}
+
+		switch content.Mode {
+		case "replace":
+			// 直接替换
+			newPayload.Data.ImageList = content.ImageList
+			newPayload.Data.ExtraPayload = content.ExtraPayload
+		case "append":
+			// 先取出原有的图片
+			originalImageList := originalPayload["data"].(map[string]interface{})["imageList"].([]string)
+
+			// 再追加新的图片
+			// 对原版前端兼容
+			newPayload.Data.ImageList = append(originalImageList, content.ImageList...)
+
+			// 新版前端用
+			var originalImageContent []screensaver.Content
+			for _, v := range originalImageList {
+				originalImageContent = append(originalImageContent, *screensaver.NewImageContent(v, content.Fit, 0))
+			}
+			newPayload.Data.ExtraPayload = content.ExtraPayload
+		case "off":
+		// do nothing
+		default:
+			log.WithFields(log.Fields{"type": "ModifyPayload"}).Error("unknown mode")
+		}
+
+		newPayload.Data.PictureSizeType = pictureSizeType
+		newPayload.Data.SwitchInterval = content.SwitchInterval
+		newPayload.Data.MaterialSource = content.Source
+		newPayload.TraceId = strings.ToUpper(uuid.New().String())
+
+		newPayloadBytes, err := json.Marshal(newPayload)
+		if err != nil {
+			log.WithFields(log.Fields{"type": "ModifyPayload"}).Error("failed to marshal new payload", err.Error())
+			return payload
+		}
+		return &newPayloadBytes
+	}
+
+	if messageType, exist := originalPayload["messageType"]; exist && messageType == 1315 {
+		// TODO:
+	}
+
+	return payload
 }
