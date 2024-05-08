@@ -7,7 +7,7 @@ import (
 
 type ScreensaverConfig struct {
 	// 劫持模式
-	HijackMode string `json:"hijackMode"`
+	Mode string `json:"mode"`
 
 	// 劫持内容
 	Contents []ScreensaverContent `json:"contents"`
@@ -36,7 +36,7 @@ type ScreensaverConfig struct {
 
 func NewScreensaverConfig() *ScreensaverConfig {
 	return &ScreensaverConfig{
-		HijackMode:     "replace",
+		Mode:           "replace",
 		Contents:       []ScreensaverContent{},
 		Source:         "屏保功能来源于SeewoMitM",
 		EmitTime:       600,

@@ -11,6 +11,7 @@ import (
 var screensaverContent DataContent
 
 type DataContent struct {
+	Mode           string        `json:"mode"`
 	ImageList      []string      `json:"imageList"`
 	ExtraPayload   *ExtraPayload `json:"extraPayload,omitempty"`
 	Source         string        `json:"source"`
@@ -78,6 +79,7 @@ func ParseScreensaverContent() DataContent {
 	}
 
 	return DataContent{
+		Mode:           gc.ScreensaverConfig.Mode,
 		ImageList:      imgList,
 		ExtraPayload:   &ExtraPayload{ScreensaverContent: contents, ScreensaverSwitchInterval: gc.ScreensaverConfig.SwitchInterval},
 		Source:         gc.ScreensaverConfig.Source,
