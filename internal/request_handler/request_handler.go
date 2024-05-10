@@ -204,7 +204,6 @@ func ModifyPayload(payload *[]byte) *[]byte {
 		newPayload.Data.PictureSizeType = pictureSizeType
 		newPayload.Data.SwitchInterval = content.SwitchInterval
 		newPayload.Data.MaterialSource = content.Source
-		newPayload.TraceId = strings.ToUpper(uuid.New().String())
 
 		newPayloadBytes, err := json.Marshal(newPayload)
 		if err != nil {
@@ -214,8 +213,48 @@ func ModifyPayload(payload *[]byte) *[]byte {
 		return &newPayloadBytes
 	}
 
-	if messageType, exist := originalPayload["messageType"]; exist && messageType == 1315 {
-		// TODO:
+	isDesktopAssistantMessage := false
+	if messageType, exist := originalPayload["messageType"]; exist {
+		switch messageType.(type) {
+		case float64:
+			if messageType.(float64) == 1315 {
+				isDesktopAssistantMessage = true
+			}
+		default:
+			// do nothing
+		}
+	}
+
+	if isDesktopAssistantMessage {
+		newPayload := desktop_assisant.Payload{}
+		err := json.Unmarshal(*payload, &newPayload)
+		if err != nil {
+			log.WithFields(log.Fields{"type": "ModifyPayload"}).Error("failed to unmarshal original payload", err.Error())
+			return payload
+		}
+
+		newPayload.Data.Urls = []struct {
+			Image  string `json:"image"`
+			Name   string `json:"name"`
+			Target string `json:"target"`
+			Type   string `json:"type"`
+		}{
+			{
+				Image:  "https://www.miyoushe.com/assets/ys-logo-v2-B_XJ9psI.png",
+				Name:   "原神",
+				Target: "https://ys.mihoyo.com/",
+				Type:   "moreapps",
+			},
+			{
+				Image:  "https://i0.hdslb.com/bfs/game/c55c98f1f31c4d2a217ffbe3187f7bce090fb6b1.jpg@280w_280h_1c_!web-search-game-cover",
+				Name:   "明日方舟",
+				Target: "https://ak.hypergryph.com/#index",
+				Type:   "moreapps",
+			},
+		}
+
+		newPayloadBytes, err := json.Marshal(newPayload)
+		return &newPayloadBytes
 	}
 
 	return payload
