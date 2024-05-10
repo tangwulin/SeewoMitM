@@ -2,19 +2,18 @@ package request_handler
 
 import (
 	"SeewoMitM/internal/connection"
+	"SeewoMitM/internal/desktop_assisant"
 	"SeewoMitM/internal/log"
 	"SeewoMitM/internal/screensaver"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"io"
 	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"strings"
 )
 
 var upgrader = websocket.Upgrader{
@@ -128,7 +127,6 @@ func RequestHandler(upstreamPort int) func(w http.ResponseWriter, r *http.Reques
 					var newPayload *[]byte
 					if r.RequestURI == "/forward/SeewoHugoHttp/SeewoHugoService" {
 						newPayload = ModifyPayload(&message.payload)
-						log.WithFields(log.Fields{"type": "WS_Downstream_Forward"}).Warn(string(*newPayload))
 					} else {
 						newPayload = &message.payload
 					}
@@ -155,18 +153,18 @@ func ModifyPayload(payload *[]byte) *[]byte {
 	}
 
 	// 屏保
-	if url, exist := originalPayload["url"]; exist && url == "/displayScreenSaver" {
+	if u, exist := originalPayload["u"]; exist && u.(string) == "/displayScreenSaver" {
 		content := screensaver.GetScreensaverContent()
+		if len(content.ExtraPayload.ScreensaverContent) == 0 {
+			return payload
+		}
+
 		var pictureSizeType int
 		switch content.Fit {
 		case "contain":
 			pictureSizeType = 0
 		case "cover":
 			pictureSizeType = 1
-		}
-
-		if len(content.ExtraPayload.ScreensaverContent) == 0 {
-			return payload
 		}
 
 		newPayload := screensaver.Payload{}
