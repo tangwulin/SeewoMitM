@@ -190,12 +190,18 @@ func ModifyPayload(payload *[]byte) *[]byte {
 			// 对原版前端兼容
 			newPayload.Data.ImageList = append(originalImageList, content.ImageList...)
 
-			// 新版前端用
-			var originalImageContent []screensaver.Content
+			// 新版前端需要把图片转换为Content
+			originalImageContent := make([]screensaver.Content, len(originalImageList)+len(content.ExtraPayload.ScreensaverContent))
+
+			// 先放原来的
 			for _, v := range originalImageList {
 				originalImageContent = append(originalImageContent, *screensaver.NewImageContent(v, content.Fit, 0))
 			}
+
 			newPayload.Data.ExtraPayload = content.ExtraPayload
+
+			// 别忘了把其余Content也放进去
+			newPayload.Data.ExtraPayload.ScreensaverContent = append(originalImageContent, content.ExtraPayload.ScreensaverContent...)
 		case "off":
 			log.WithFields(log.Fields{"type": "ModifyPayload"}).Info("screensaver modify off")
 		// do nothing
