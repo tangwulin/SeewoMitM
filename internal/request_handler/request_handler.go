@@ -177,10 +177,12 @@ func ModifyPayload(payload *[]byte) *[]byte {
 
 		switch content.Mode {
 		case "replace":
+			log.WithFields(log.Fields{"type": "ModifyPayload"}).Info("replace mode")
 			// 直接替换
 			newPayload.Data.ImageList = content.ImageList
 			newPayload.Data.ExtraPayload = content.ExtraPayload
 		case "append":
+			log.WithFields(log.Fields{"type": "ModifyPayload"}).Info("append mode")
 			// 先取出原有的图片
 			originalImageList := originalPayload["data"].(map[string]interface{})["imageList"].([]string)
 
@@ -195,6 +197,7 @@ func ModifyPayload(payload *[]byte) *[]byte {
 			}
 			newPayload.Data.ExtraPayload = content.ExtraPayload
 		case "off":
+			log.WithFields(log.Fields{"type": "ModifyPayload"}).Info("screensaver modify off")
 		// do nothing
 		default:
 			log.WithFields(log.Fields{"type": "ModifyPayload"}).Error("unknown mode")
