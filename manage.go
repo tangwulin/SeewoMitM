@@ -1,8 +1,8 @@
-package manage
+package main
 
 import (
 	"SeewoMitM/internal/log"
-	"SeewoMitM/internal/screensaver"
+
 	"github.com/gin-gonic/gin"
 	"strconv"
 )
@@ -37,7 +37,7 @@ func LaunchManageServer(port int) error {
 			v1.GET("/config", func(c *gin.Context) {
 				c.JSON(200, gin.H{
 					"message": "config",
-					"data":    screensaver.GetScreensaverContent(),
+					"data":    GetScreensaverContent(),
 					"code":    200,
 				})
 			})
@@ -45,7 +45,7 @@ func LaunchManageServer(port int) error {
 			v1.GET("/getScreensaverPayload", func(c *gin.Context) {
 				c.JSON(200, gin.H{
 					"message": "getScreensaverPayload",
-					"data":    screensaver.GetPayload(),
+					"data":    GetScreensaverPayload(),
 					"code":    200,
 				})
 			})

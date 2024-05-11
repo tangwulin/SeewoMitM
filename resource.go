@@ -1,7 +1,6 @@
-package resource
+package main
 
 import (
-	"SeewoMitM/internal/downloader"
 	"SeewoMitM/internal/helper"
 	"SeewoMitM/internal/log"
 	"os"
@@ -45,7 +44,7 @@ func PrepareResource(url, filename string) {
 			return
 		}
 	}
-	downloader.AddDownloadTask(url, path.Join(resourceDir, filename))
+	AddDownloadTask(url, path.Join(resourceDir, filename))
 }
 
 func LaunchResourceService(port int, path string) {

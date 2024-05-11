@@ -1,10 +1,7 @@
-package request_handler
+package main
 
 import (
-	"SeewoMitM/internal/connection"
-	"SeewoMitM/internal/desktop_assisant"
 	"SeewoMitM/internal/log"
-	"SeewoMitM/internal/screensaver"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -79,13 +76,13 @@ func RequestHandler(upstreamPort int) func(w http.ResponseWriter, r *http.Reques
 			log.WithFields(log.Fields{"type": "WS_Upstream_Connect"}).Tracef("Upstream Websocket connect success, url:%s", wssUpstreamUrl)
 		}
 
-		c := &connection.Connection{URL: r.RequestURI, UpstreamConn: upstream, DownstreamConn: downstream}
+		c := &Connection{URL: r.RequestURI, UpstreamConn: upstream, DownstreamConn: downstream}
 
-		connection.AddConnection(c)
+		AddConnection(c)
 
 		go func() {
 			defer downstream.Close()
-			defer connection.RemoveConnection(c)
+			defer RemoveConnection(c)
 			for {
 				mt, payload, err := downstream.ReadMessage()
 				log.WithFields(log.Fields{"type": "WS_Downstream_ReceiveMessage"}).Trace(string(payload))
@@ -100,7 +97,7 @@ func RequestHandler(upstreamPort int) func(w http.ResponseWriter, r *http.Reques
 
 		go func() {
 			defer upstream.Close()
-			defer connection.RemoveConnection(c)
+			defer RemoveConnection(c)
 			for {
 				mt, payload, err := upstream.ReadMessage()
 				log.WithFields(log.Fields{"type": "WS_Upstream_ReceiveMessage"}).Trace(string(payload))
@@ -155,7 +152,7 @@ func ModifyPayload(payload *[]byte) *[]byte {
 	// 屏保
 	if u, exist := originalPayload["url"]; exist && u.(string) == "/displayScreenSaver" {
 		log.WithFields(log.Fields{"type": "ModifyPayload"}).Info("displayScreenSaver message detected!")
-		content := screensaver.GetScreensaverContent()
+		content := GetScreensaverContent()
 		if len(content.ExtraPayload.ScreensaverContent) == 0 {
 			return payload
 		}
@@ -168,7 +165,7 @@ func ModifyPayload(payload *[]byte) *[]byte {
 			pictureSizeType = 1
 		}
 
-		newPayload := screensaver.Payload{}
+		newPayload := ScreensaverPayload{}
 		err := json.Unmarshal(*payload, &newPayload)
 		if err != nil {
 			log.WithFields(log.Fields{"type": "ModifyPayload"}).Error("failed to unmarshal new payload", err.Error())
@@ -191,11 +188,11 @@ func ModifyPayload(payload *[]byte) *[]byte {
 			newPayload.Data.ImageList = append(originalImageList, content.ImageList...)
 
 			// 新版前端需要把图片转换为Content
-			originalImageContent := make([]screensaver.Content, len(originalImageList)+len(content.ExtraPayload.ScreensaverContent))
+			originalImageContent := make([]Content, len(originalImageList)+len(content.ExtraPayload.ScreensaverContent))
 
 			// 先放原来的
 			for _, v := range originalImageList {
-				originalImageContent = append(originalImageContent, *screensaver.NewImageContent(v, content.Fit, 0))
+				originalImageContent = append(originalImageContent, *NewImageContent(v, content.Fit, 0))
 			}
 
 			newPayload.Data.ExtraPayload = content.ExtraPayload
@@ -235,7 +232,7 @@ func ModifyPayload(payload *[]byte) *[]byte {
 
 	if isDesktopAssistantMessage {
 		log.WithFields(log.Fields{"type": "ModifyPayload"}).Info("desktop assistant message detected!")
-		newPayload := desktop_assisant.Payload{}
+		newPayload := DesktopAssisantPayload{}
 		err := json.Unmarshal(*payload, &newPayload)
 		if err != nil {
 			log.WithFields(log.Fields{"type": "ModifyPayload"}).Error("failed to unmarshal original payload", err.Error())

@@ -1,4 +1,4 @@
-package connection
+package main
 
 import (
 	"SeewoMitM/internal/log"

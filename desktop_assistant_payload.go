@@ -1,8 +1,13 @@
-package desktop_assisant
+package main
 
-type Payload struct {
+type DesktopAssisantPayload struct {
 	Data struct {
-		Apps []interface{} `json:"apps"`
+		Apps []struct {
+			ExePath string `json:"exePath"`
+			Image   string `json:"image"`
+			Name    string `json:"name"`
+			Type    string `json:"type"`
+		} `json:"apps"`
 		Urls []struct {
 			Image  string `json:"image"`
 			Name   string `json:"name"`

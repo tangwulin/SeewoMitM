@@ -1,11 +1,11 @@
-package screensaver
+package main
 
 import (
 	"github.com/google/uuid"
 	"strings"
 )
 
-type Payload struct {
+type ScreensaverPayload struct {
 	Data    Data   `json:"data"`
 	TraceId string `json:"traceId"`
 	Url     string `json:"url"`
@@ -31,7 +31,7 @@ type TextItem struct {
 	Provenance string `json:"provenance"`
 }
 
-func GetPayload() *Payload {
+func GetScreensaverPayload() *ScreensaverPayload {
 	content := GetScreensaverContent()
 
 	var pictureSizeType int
@@ -42,7 +42,7 @@ func GetPayload() *Payload {
 		pictureSizeType = 1
 	}
 
-	return &Payload{
+	return &ScreensaverPayload{
 		Data: Data{
 			ImageList:       content.ImageList,
 			MaterialSource:  content.Source,

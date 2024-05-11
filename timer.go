@@ -1,4 +1,4 @@
-package timer
+package main
 
 import (
 	"SeewoMitM/internal/log"

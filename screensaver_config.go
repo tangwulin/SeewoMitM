@@ -1,7 +1,6 @@
-package config
+package main
 
 import (
-	"SeewoMitM/internal/spine"
 	"strings"
 )
 
@@ -79,7 +78,7 @@ type ScreensaverContent struct {
 
 	/* 只有Spine有的 */
 	// SpinePlayer的配置
-	SpinePlayerConfig *spine.SpinePlayerConfig `json:"spinePlayerConfig,omitempty"`
+	SpinePlayerConfig *SpinePlayerConfig `json:"spinePlayerConfig,omitempty"`
 }
 
 func (content ScreensaverContent) IsRequirePreload() bool {
@@ -112,7 +111,7 @@ func NewScreensaverVideoContent(path string, requirePreload bool, fit string, mu
 	}
 }
 
-func NewScreensaverSpineContent(spinePlayerConfig *spine.SpinePlayerConfig, requirePreload bool, duration int) *ScreensaverContent {
+func NewScreensaverSpineContent(spinePlayerConfig *SpinePlayerConfig, requirePreload bool, duration int) *ScreensaverContent {
 	return &ScreensaverContent{
 		Type:              "spine",
 		RequirePreload:    requirePreload,

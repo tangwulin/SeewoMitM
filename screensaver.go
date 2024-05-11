@@ -1,10 +1,8 @@
-package screensaver
+package main
 
 import (
-	"SeewoMitM/internal/config"
 	"SeewoMitM/internal/helper"
 	"SeewoMitM/internal/log"
-	"SeewoMitM/internal/resource"
 	"strings"
 )
 
@@ -22,7 +20,7 @@ type DataContent struct {
 }
 
 func ParseScreensaverContent() DataContent {
-	gc := helper.GetConfig()
+	gc := GetConfig()
 	if gc.ScreensaverConfig == nil {
 		return DataContent{}
 	}
@@ -90,18 +88,18 @@ func ParseScreensaverContent() DataContent {
 	}
 }
 
-func GetContentTrueUrl(c config.ScreensaverContent) string {
+func GetContentTrueUrl(c ScreensaverContent) string {
 	if c.IsRequirePreload() {
 		md5 := helper.MD5Sum([]byte(c.Path))
-		resource.PrepareResource(c.Path, md5)
-		return resource.GetResourceServerAddr() + "/" + md5
+		PrepareResource(c.Path, md5)
+		return GetResourceServerAddr() + "/" + md5
 	}
 	return c.Path
 }
 
 func GetResourceTrueUrl(url string, requirePreload bool) string {
 	if strings.HasPrefix(url, "http") && requirePreload {
-		return resource.GetResourceServerAddr() + "/" + url
+		return GetResourceServerAddr() + "/" + url
 	}
 	return url
 }

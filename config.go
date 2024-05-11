@@ -1,4 +1,4 @@
-package config
+package main
 
 type Config struct {
 	// 日志等级
@@ -6,4 +6,14 @@ type Config struct {
 
 	// 屏幕保护相关配置
 	ScreensaverConfig *ScreensaverConfig `json:"screensaverConfig"`
+}
+
+var globalConfig = Config{}
+
+func GetConfig() *Config {
+	return &globalConfig
+}
+
+func SetConfig(config Config) {
+	globalConfig = config
 }

@@ -1,8 +1,7 @@
-package mitm
+package main
 
 import (
 	"SeewoMitM/internal/log"
-	"SeewoMitM/internal/request_handler"
 	"crypto/tls"
 	"embed"
 	"fmt"
@@ -31,7 +30,7 @@ func LaunchMitMService(downstreamPort int, upstreamPort int, certFiles embed.FS)
 		TLSConfig: &tls.Config{Certificates: append([]tls.Certificate{}, cert)},
 	}
 
-	reqHandler := request_handler.RequestHandler(upstreamPort)
+	reqHandler := RequestHandler(upstreamPort)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", reqHandler)
 	s.Handler = mux

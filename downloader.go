@@ -1,4 +1,4 @@
-package downloader
+package main
 
 import (
 	"SeewoMitM/internal/log"
