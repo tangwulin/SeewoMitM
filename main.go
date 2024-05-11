@@ -167,7 +167,15 @@ func main() {
 
 	// 启动管理服务
 	go func() {
-		err = manage.LaunchManageServer(14516)
+		managePort, err := helper.GetAvailablePort(11451)
+		if err != nil {
+			log.WithFields(log.Fields{"type": "GetAvailablePort"}).Error(err.Error())
+			log.WithFields(log.Fields{"type": "Manage"}).Error("could not get available manage port")
+			wg.Done()
+			return
+		}
+		log.WithFields(log.Fields{"type": "Manage"}).Info(fmt.Sprintf("manage port:%d", managePort))
+		err = manage.LaunchManageServer(managePort)
 		if err != nil {
 			log.WithFields(log.Fields{"type": "LaunchManageServer"}).Error(err.Error())
 		}
