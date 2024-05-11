@@ -234,6 +234,7 @@ func ModifyPayload(payload *[]byte) *[]byte {
 	}
 
 	if isDesktopAssistantMessage {
+		log.WithFields(log.Fields{"type": "ModifyPayload"}).Info("desktop assistant message detected!")
 		newPayload := desktop_assisant.Payload{}
 		err := json.Unmarshal(*payload, &newPayload)
 		if err != nil {
