@@ -153,7 +153,8 @@ func ModifyPayload(payload *[]byte) *[]byte {
 	}
 
 	// 屏保
-	if u, exist := originalPayload["u"]; exist && u.(string) == "/displayScreenSaver" {
+	if u, exist := originalPayload["url"]; exist && u.(string) == "/displayScreenSaver" {
+		log.WithFields(log.Fields{"type": "ModifyPayload"}).Info("displayScreenSaver message detected!")
 		content := screensaver.GetScreensaverContent()
 		if len(content.ExtraPayload.ScreensaverContent) == 0 {
 			return payload
