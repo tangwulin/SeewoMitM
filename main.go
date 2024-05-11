@@ -215,12 +215,12 @@ func main() {
 					jsonData, err := json.Marshal(payload)
 					if err != nil {
 						log.WithFields(log.Fields{"type": "GetPayload"}).Error(err.Error())
-						return
+						continue
 					}
 					err = v.DownstreamConn.WriteMessage(websocket.TextMessage, jsonData)
 					if err != nil {
 						log.WithFields(log.Fields{"type": "SendPayload"}).Error(err.Error())
-						return
+						continue
 					}
 				}
 			}
