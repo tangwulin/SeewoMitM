@@ -60,7 +60,7 @@ func ParseScreensaverContent() DataContent {
 				spinePlayerConfig.BackgroundImage.Url = GetResourceTrueUrl(spinePlayerConfig.BackgroundImage.Url, c.RequirePreload)
 			}*/
 
-			contents = append(contents, *NewSpineContent(c.Path, c.SpinePlayerConfig, c.Duration))
+			contents = append(contents, *NewSpineContent(c.Path, c.SpinePlayerConfig, c.Duration, c.Scale, c.OffsetX, c.OffsetY))
 		default:
 			log.WithFields(log.Fields{"type": "ParseScreensaverContent"}).Error("unknown content type, content will be ignored:", c)
 			continue

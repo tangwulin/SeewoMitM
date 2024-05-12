@@ -79,6 +79,9 @@ type ScreensaverContent struct {
 	/* 只有Spine有的 */
 	// SpinePlayer的配置
 	SpinePlayerConfig *SpinePlayerConfig `json:"spinePlayerConfig,omitempty"`
+	Scale             float64            `json:"scale,omitempty"`
+	OffsetX           float64            `json:"offsetX,omitempty"`
+	OffsetY           float64            `json:"offsetY,omitempty"`
 }
 
 func (content ScreensaverContent) IsRequirePreload() bool {
@@ -117,5 +120,8 @@ func NewScreensaverSpineContent(spinePlayerConfig *SpinePlayerConfig, requirePre
 		RequirePreload:    requirePreload,
 		SpinePlayerConfig: spinePlayerConfig,
 		Duration:          duration,
+		Scale:             1,
+		OffsetX:           0,
+		OffsetY:           0,
 	}
 }

@@ -6,6 +6,9 @@ type Content struct {
 	Fit               string             `json:"fit,omitempty"`
 	SpinePlayerConfig *SpinePlayerConfig `json:"spinePlayerConfig,omitempty"`
 	Duration          int                `json:"duration,omitempty"`
+	Scale             float64            `json:"scale,omitempty"`
+	OffsetX           float64            `json:"offsetX,omitempty"`
+	OffsetY           float64            `json:"offsetY,omitempty"`
 }
 
 func NewImageContent(path string, fit string, duration int) *Content {
@@ -26,11 +29,14 @@ func NewVideoContent(path string, fit string, duration int) *Content {
 	}
 }
 
-func NewSpineContent(path string, spinePlayerConfig *SpinePlayerConfig, duration int) *Content {
+func NewSpineContent(path string, spinePlayerConfig *SpinePlayerConfig, duration int, scale, offsetX, offsetY float64) *Content {
 	return &Content{
 		Type:              "spine",
 		Path:              path,
 		SpinePlayerConfig: spinePlayerConfig,
 		Duration:          duration,
+		Scale:             scale,
+		OffsetX:           offsetX,
+		OffsetY:           offsetY,
 	}
 }
