@@ -1,10 +1,8 @@
 package helper
 
-import (
-	"crypto/md5"
-)
+import "crypto/md5"
 
-func GetMD5(data string) string {
-	s := md5.Sum([]byte(data))
-	return string(s[:])
+func MD5Sum(data []byte) string {
+	original := md5.Sum(data)
+	return string(original[:])
 }

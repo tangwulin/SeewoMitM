@@ -1,8 +1,7 @@
-package server
+package main
 
 import (
 	"SeewoMitM/internal/log"
-	"SeewoMitM/internal/request_handler"
 	"crypto/tls"
 	"embed"
 	"fmt"
@@ -10,7 +9,7 @@ import (
 	"strconv"
 )
 
-func LaunchMitMServer(downstreamPort int, upstreamPort int, certFiles embed.FS) error {
+func LaunchMitMService(downstreamPort int, upstreamPort int, certFiles embed.FS) error {
 	// 读取证书文件
 	certContent, err := certFiles.ReadFile("server.crt")
 	if err != nil {
@@ -31,7 +30,7 @@ func LaunchMitMServer(downstreamPort int, upstreamPort int, certFiles embed.FS) 
 		TLSConfig: &tls.Config{Certificates: append([]tls.Certificate{}, cert)},
 	}
 
-	reqHandler := request_handler.RequestHandler(upstreamPort)
+	reqHandler := RequestHandler(upstreamPort)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", reqHandler)
 	s.Handler = mux

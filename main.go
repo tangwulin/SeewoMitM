@@ -1,19 +1,18 @@
 package main
 
 import (
-	"SeewoMitM/internal/config"
-	"SeewoMitM/internal/downloader"
 	"SeewoMitM/internal/helper"
 	"SeewoMitM/internal/log"
-	"SeewoMitM/internal/server"
 	"embed"
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 	"io"
 	"os"
 	"sync"
+	"time"
 )
 
 //go:embed server.crt server.key
@@ -26,7 +25,6 @@ func main() {
 	upstreamPortPtr := flag.Int("upstream", 0, "上游端口")
 	downstreamPortPtr := flag.Int("downstream", 0, "下游端口")
 	logLevelPtr := flag.String("logLevel", "", "日志级别")
-	//runAsDaemonPtr := flag.Bool("daemon", false, "是否以守护进程运行")
 
 	// 解析命令行参数
 	flag.Parse()
@@ -53,11 +51,10 @@ func main() {
 			}
 			defer file.Close()
 
-			defaultConfig := config.Config{
-				LogLevel:                 "info",
-				ScreenSaverHijackMode:    config.ScreenSaverHijackModeReplaceAll,
-				ScreenSaverHijackContent: make([]config.ScreenSaverHijackContent, 0),
-				ScreenSaverEmitTime:      600}
+			defaultConfig := Config{
+				LogLevel:          "info",
+				ScreensaverConfig: NewScreensaverConfig(),
+			}
 
 			encoder := json.NewEncoder(file)
 			encoder.SetIndent("", "\t")
@@ -74,14 +71,14 @@ func main() {
 	}
 
 	//检查是否有配置文件
-	configs, err := helper.ReadAndParseConfig(configFilePath)
+	configs, err := ReadAndParseConfig(configFilePath)
 	if err != nil {
 		fmt.Printf("ReadAndParseConfig error: %v\n", err)
 		panic(err)
 		return
 	}
 
-	helper.SetConfig(*configs)
+	SetConfig(*configs)
 
 	// 检测有没有指定日志文件路径
 	if *logFilePathPtr != "" {
@@ -115,7 +112,7 @@ func main() {
 	// 初始化日志
 	logFile := helper.GetLogFile(logDir)
 	log.InitGlobal(
-		log.NewLogrusAdapt(&logrus.Logger{Out: io.MultiWriter(os.Stderr, logFile),
+		log.NewLogrusAdapt(&logrus.Logger{Out: io.MultiWriter(os.Stdout, logFile),
 			Formatter: new(logrus.TextFormatter),
 			Hooks:     make(logrus.LevelHooks), Level: logrus.Level(log.FindLevel(logLevel))}))
 
@@ -144,7 +141,7 @@ func main() {
 	if *downstreamPortPtr != 0 {
 		downstreamPort = *downstreamPortPtr
 	} else {
-		downstreamPort, err = helper.GetAvailablePort(11451)
+		downstreamPort, err = helper.GetAvailablePort(14514)
 		if err != nil {
 			log.WithFields(log.Fields{"type": "GetAvailablePort"}).Error(err.Error())
 			return
@@ -152,40 +149,35 @@ func main() {
 	}
 	log.WithFields(log.Fields{"type": "Downstream"}).Info(fmt.Sprintf("downstream port:%d", downstreamPort))
 
-	// 解析配置文件里面的屏保内容
+	LaunchDownloader(2)
+	LoadScreensaverContent()
+	LaunchResourceService(14515, "./resource")
 
 	wg := sync.WaitGroup{}
 	wg.Add(2)
 
-	// 启动MitM服务
+	// 启动管理服务
 	go func() {
-		err := server.LaunchMitMServer(downstreamPort, upstreamPort, certFiles)
+		managePort, err := helper.GetAvailablePort(11451)
 		if err != nil {
-			log.WithFields(log.Fields{"type": "LaunchMitMServer"}).Error(err.Error())
+			log.WithFields(log.Fields{"type": "GetAvailablePort"}).Error(err.Error())
+			log.WithFields(log.Fields{"type": "Manage"}).Error("could not get available manage port")
+			wg.Done()
+			return
+		}
+		log.WithFields(log.Fields{"type": "Manage"}).Info(fmt.Sprintf("manage port:%d", managePort))
+		err = LaunchManageServer(managePort)
+		if err != nil {
+			log.WithFields(log.Fields{"type": "LaunchManageServer"}).Error(err.Error())
 		}
 		wg.Done()
 	}()
 
-	// 启动下载器
+	// 启动服务端
 	go func() {
-		downloader.StartDownloader()
-	}()
-
-	//go func() {
-	//	screensaver.LoadScreenSaverConfig(configs)
-	//}()
-
-	// 启动资源服务器
-	go func() {
-		port, err := helper.GetAvailablePort(14514)
+		err = LaunchMitMService(downstreamPort, upstreamPort, certFiles)
 		if err != nil {
-			log.WithFields(log.Fields{"type": "ResourceServer"}).Errorf("Get available port failed:%v", err.Error())
-			log.WithFields(log.Fields{"type": "ResourceServer"}).Error("Cache server start failed")
-		}
-		config.SetResourceServerAddr(fmt.Sprintf("http://localhost:%d/getResource", port))
-		err = server.LaunchResourceServer(port)
-		if err != nil {
-			log.WithFields(log.Fields{"type": "LaunchResourceServer"}).Error(err.Error())
+			log.WithFields(log.Fields{"type": "LaunchMitMService"}).Error(err.Error())
 		}
 		wg.Done()
 	}()
@@ -205,55 +197,29 @@ func main() {
 	}
 
 	//启动屏保定时器
-	//	go func() {
-	//		err := timer.LaunchScreenSaverTimer(time.Duration(configs.ScreenSaverEmitTime)*time.Second, func() {
-	//			cp := *connection.GetConnectionPool()
-	//			for _, v := range cp {
-	//				if v.URL == "/forward/SeewoHugoHttp/SeewoHugoService" {
-	//					err := v.DownstreamConn.WriteMessage(websocket.TextMessage, []byte(`{
-	//    "data": {
-	//        "imageList": [
-	//            "D:\\85499466.jpg",
-	//            "D:\\532421.jpg",
-	//            "D:\\650142.jpg",
-	//            "D:\\124177.jpg",
-	//            "D:\\1325365.jpg"
-	//        ],
-	//        "materialSource": "屏保功能来源于中国人口吧",
-	//        "extraPayload": [
-	//            "屏保功能来源于中国人口吧",
-	//            {
-	//                "type": "image",
-	//                "path": "D:\\85499466.jpg"
-	//            }
-	//        ],
-	//        "pictureSizeType": 1,
-	//        "playMode": 0,
-	//        "switchInterval": 5,
-	//        "textList": [
-	//            {
-	//                "content": "aaa",
-	//                "provenance": "bbb"
-	//            },
-	//            {
-	//                "content": "foo",
-	//                "provenance": "bar"
-	//            }
-	//        ]
-	//    },
-	//    "traceId": "0C89A601-B51D-488D-87EC-5862CE75ABE7",
-	//    "url": "/displayScreenSaver"
-	//}`))
-	//					if err != nil {
-	//						return
-	//					}
-	//				}
-	//			}
-	//		})
-	//		if err != nil {
-	//			return
-	//		}
-	//	}()
+	go func() {
+		err := LaunchScreenSaverTimer(time.Duration(configs.ScreensaverConfig.EmitTime)*time.Second, func() {
+			cp := *GetConnectionPool()
+			for _, v := range cp {
+				if v.URL == "/forward/SeewoHugoHttp/SeewoHugoService" {
+					payload := GetScreensaverPayload()
+					jsonData, err := json.Marshal(payload)
+					if err != nil {
+						log.WithFields(log.Fields{"type": "GetScreensaverPayload"}).Error(err.Error())
+						continue
+					}
+					err = v.DownstreamConn.WriteMessage(websocket.TextMessage, jsonData)
+					if err != nil {
+						log.WithFields(log.Fields{"type": "SendPayload"}).Error(err.Error())
+						continue
+					}
+				}
+			}
+		})
+		if err != nil {
+			return
+		}
+	}()
 
 	wg.Wait()
 }
