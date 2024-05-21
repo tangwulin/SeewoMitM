@@ -2,8 +2,9 @@ package main
 
 import (
 	"SeewoMitM/internal/log"
-
 	"github.com/gin-gonic/gin"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"strconv"
 )
 
@@ -45,13 +46,17 @@ func LaunchManageServer(port int) error {
 			v1.GET("/getScreensaverPayload", func(c *gin.Context) {
 				c.JSON(200, gin.H{
 					"message": "getScreensaverPayload",
-					"data":    GetScreensaverPayload(),
+					"data":    GenScreensaverPayload(),
 					"code":    200,
 				})
 			})
+
+			v1.GET("/getScreensaverContent", GetScreensaverContentHandler)
+			v1.POST("/getScreensaverContentByID", GetScreensaverContentByIDHandler)
 		}
 	}
 
+	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	err := engine.Run(":" + strconv.Itoa(port))
 	if err != nil {
 		log.WithFields(log.Fields{"type": "ManageServer"}).Error("failed to launch manage server")

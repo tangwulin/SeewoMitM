@@ -2,6 +2,7 @@ package main
 
 import (
 	"SeewoMitM/internal/log"
+	"SeewoMitM/model"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -165,7 +166,7 @@ func ModifyPayload(payload *[]byte) *[]byte {
 			pictureSizeType = 1
 		}
 
-		newPayload := ScreensaverPayload{}
+		newPayload := model.ScreensaverPayload{}
 		err := json.Unmarshal(*payload, &newPayload)
 		if err != nil {
 			log.WithFields(log.Fields{"type": "ModifyPayload"}).Error("failed to unmarshal new payload", err.Error())
@@ -188,7 +189,7 @@ func ModifyPayload(payload *[]byte) *[]byte {
 			newPayload.Data.ImageList = append(originalImageList, content.ImageList...)
 
 			// 新版前端需要把图片转换为Content
-			originalImageContent := make([]Content, len(originalImageList)+len(content.ExtraPayload.ScreensaverContent))
+			originalImageContent := make([]model.ScreensaverContentPayload, len(originalImageList)+len(content.ExtraPayload.ScreensaverContent))
 
 			// 先放原来的
 			for _, v := range originalImageList {
@@ -232,7 +233,7 @@ func ModifyPayload(payload *[]byte) *[]byte {
 
 	if isDesktopAssistantMessage {
 		log.WithFields(log.Fields{"type": "ModifyPayload"}).Info("desktop assistant message detected!")
-		newPayload := DesktopAssisantPayload{}
+		newPayload := model.DesktopAssistantPayload{}
 		err := json.Unmarshal(*payload, &newPayload)
 		if err != nil {
 			log.WithFields(log.Fields{"type": "ModifyPayload"}).Error("failed to unmarshal original payload", err.Error())

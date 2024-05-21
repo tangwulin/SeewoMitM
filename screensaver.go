@@ -3,30 +3,20 @@ package main
 import (
 	"SeewoMitM/internal/helper"
 	"SeewoMitM/internal/log"
+	"SeewoMitM/model"
 	"strings"
 )
 
-var screensaverContent DataContent
+var screensaverContent model.DataContent
 
-type DataContent struct {
-	Mode           string        `json:"mode"`
-	ImageList      []string      `json:"imageList"`
-	ExtraPayload   *ExtraPayload `json:"extraPayload,omitempty"`
-	Source         string        `json:"source"`
-	Fit            string        `json:"fit"`
-	PlayMode       string        `json:"playMode"`
-	SwitchInterval int           `json:"switchInterval"`
-	TextList       []TextItem    `json:"textList"`
-}
-
-func ParseScreensaverContent() DataContent {
+func ParseScreensaverContent() model.DataContent {
 	gc := GetConfig()
 	if gc.ScreensaverConfig == nil {
-		return DataContent{}
+		return model.DataContent{}
 	}
 
-	imgList := make([]string, 0)
-	contents := make([]Content, 0)
+	imgList := make([]string, 0, len(gc.ScreensaverConfig.Contents)/2)
+	contents := make([]model.ScreensaverContentPayload, 0, len(gc.ScreensaverConfig.Contents))
 
 	//TODO: 资源预加载还需要针对spine进行处理
 	for _, c := range gc.ScreensaverConfig.Contents {
@@ -67,19 +57,19 @@ func ParseScreensaverContent() DataContent {
 		}
 	}
 
-	textList := make([]TextItem, 0)
+	textList := make([]model.TextItem, 0)
 	// golang是没有鸭子类型吗？？？
 	for _, t := range gc.ScreensaverConfig.TextList {
-		textList = append(textList, TextItem{
+		textList = append(textList, model.TextItem{
 			Content:    t.Content,
 			Provenance: t.Provenance,
 		})
 	}
 
-	return DataContent{
+	return model.DataContent{
 		Mode:           gc.ScreensaverConfig.Mode,
 		ImageList:      imgList,
-		ExtraPayload:   &ExtraPayload{ScreensaverContent: contents, ScreensaverSwitchInterval: gc.ScreensaverConfig.SwitchInterval},
+		ExtraPayload:   &model.ExtraPayload{ScreensaverContent: contents, ScreensaverSwitchInterval: gc.ScreensaverConfig.SwitchInterval},
 		Source:         gc.ScreensaverConfig.Source,
 		Fit:            gc.ScreensaverConfig.Fit,
 		PlayMode:       gc.ScreensaverConfig.PlayMode,
@@ -88,7 +78,7 @@ func ParseScreensaverContent() DataContent {
 	}
 }
 
-func GetContentTrueUrl(c ScreensaverContent) string {
+func GetContentTrueUrl(c model.ScreensaverContent) string {
 	if c.IsRequirePreload() {
 		md5 := helper.MD5Sum([]byte(c.Path))
 		PrepareResource(c.Path, md5)
@@ -108,6 +98,6 @@ func LoadScreensaverContent() {
 	screensaverContent = ParseScreensaverContent()
 }
 
-func GetScreensaverContent() *DataContent {
+func GetScreensaverContent() *model.DataContent {
 	return &screensaverContent
 }

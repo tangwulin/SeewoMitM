@@ -1,8 +1,6 @@
-package main
+package model
 
-import (
-	"strings"
-)
+import "strings"
 
 type ScreensaverConfig struct {
 	// 劫持模式
@@ -33,24 +31,21 @@ type ScreensaverConfig struct {
 	} `json:"textList"`
 }
 
-func NewScreensaverConfig() *ScreensaverConfig {
-	return &ScreensaverConfig{
-		Mode:           "replace",
-		Contents:       []ScreensaverContent{},
-		Source:         "屏保功能来源于SeewoMitM",
-		EmitTime:       600,
-		Fit:            "contain",
-		PlayMode:       "sequence",
-		SwitchInterval: 5000,
-		TextList: []struct {
-			Content    string `json:"content"`
-			Provenance string `json:"provenance"`
-		}{},
+func (config *ScreensaverConfig) GetContentByID(id int) *ScreensaverContent {
+	for _, content := range config.Contents {
+		if content.ID == id {
+			return &content
+		}
 	}
+	return nil
 }
 
 type ScreensaverContent struct {
 	/* 所有都会有的 */
+
+	// ID
+	ID int `json:"id,omitempty"`
+
 	// 类型
 	Type string `json:"type,omitempty"`
 
@@ -86,42 +81,4 @@ type ScreensaverContent struct {
 
 func (content ScreensaverContent) IsRequirePreload() bool {
 	return content.RequirePreload && strings.HasPrefix(content.Path, "http")
-}
-
-func NewScreensaverContent() *ScreensaverContent {
-	return &ScreensaverContent{}
-}
-
-func NewScreensaverImageContent(path string, requirePreload bool, fit string, duration int) *ScreensaverContent {
-	return &ScreensaverContent{
-		Type:           "image",
-		Path:           path,
-		RequirePreload: requirePreload,
-		Fit:            fit,
-		Duration:       duration,
-	}
-}
-
-func NewScreensaverVideoContent(path string, requirePreload bool, fit string, muted bool, loop bool, duration int) *ScreensaverContent {
-	return &ScreensaverContent{
-		Type:           "video",
-		Path:           path,
-		RequirePreload: requirePreload,
-		Fit:            fit,
-		Muted:          muted,
-		Loop:           loop,
-		Duration:       duration,
-	}
-}
-
-func NewScreensaverSpineContent(spinePlayerConfig *SpinePlayerConfig, requirePreload bool, duration int) *ScreensaverContent {
-	return &ScreensaverContent{
-		Type:              "spine",
-		RequirePreload:    requirePreload,
-		SpinePlayerConfig: spinePlayerConfig,
-		Duration:          duration,
-		Scale:             1,
-		OffsetX:           0,
-		OffsetY:           0,
-	}
 }

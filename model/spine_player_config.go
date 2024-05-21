@@ -1,4 +1,4 @@
-package main
+package model
 
 type SpinePlayerConfig struct {
 	JsonUrl                   string            `json:"jsonUrl,omitempty"`

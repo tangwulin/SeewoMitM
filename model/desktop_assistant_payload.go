@@ -1,6 +1,6 @@
-package main
+package model
 
-type DesktopAssisantPayload struct {
+type DesktopAssistantPayload struct {
 	Data struct {
 		Apps []struct {
 			ExePath string `json:"exePath"`
