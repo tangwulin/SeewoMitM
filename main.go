@@ -53,46 +53,10 @@ func main() {
 		configFilePath = *configFilePathPtr
 	}
 
-	if _, err := os.Stat(configFilePath); os.IsNotExist(err) {
-		if configFilePath == "./config.json" {
-			fmt.Println("config file not found, creating default config file...")
-
-			// 创建默认配置文件
-			file, err := os.Create(configFilePath)
-			if err != nil {
-				fmt.Printf("create config file error: %v\n", err)
-				return
-			}
-			defer file.Close()
-
-			defaultConfig := Config{
-				LogLevel:          "info",
-				ScreensaverConfig: NewScreensaverConfig(),
-			}
-
-			encoder := json.NewEncoder(file)
-			encoder.SetIndent("", "\t")
-			err = encoder.Encode(defaultConfig)
-			if err != nil {
-				fmt.Printf("write config file error: %v\n", err)
-				return
-			}
-			file.Close()
-		} else {
-			fmt.Printf("config file not found\n")
-			return
-		}
-	}
-
-	//检查是否有配置文件
-	configs, err := ReadAndParseConfig(configFilePath)
+	err := InitConfig(configFilePath)
 	if err != nil {
-		fmt.Printf("ReadAndParseConfig error: %v\n", err)
-		panic(err)
 		return
 	}
-
-	SetConfig(*configs)
 
 	// 检测有没有指定日志文件路径
 	if *logFilePathPtr != "" {

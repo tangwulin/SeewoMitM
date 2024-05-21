@@ -1,6 +1,13 @@
 package main
 
-import "SeewoMitM/model"
+import (
+	"SeewoMitM/model"
+	"errors"
+	"fmt"
+	"github.com/spf13/viper"
+	"os"
+	"path"
+)
 
 type Config struct {
 	// 日志等级
@@ -10,12 +17,36 @@ type Config struct {
 	ScreensaverConfig *model.ScreensaverConfig `json:"screensaverConfig"`
 }
 
-var globalConfig = Config{}
+func InitConfig(configPath string) error {
+	dir, fileName := path.Split(configPath)
+	viper.SetConfigFile(fileName)
+	viper.AddConfigPath(dir)
 
-func GetConfig() *Config {
-	return &globalConfig
-}
+	if err := viper.ReadInConfig(); err != nil {
+		var configFileNotFoundError viper.ConfigFileNotFoundError
 
-func SetConfig(config Config) {
-	globalConfig = config
+		if errors.As(err, &configFileNotFoundError) {
+			fmt.Println("config file not found, creating default config file...")
+			// 创建默认配置文件
+			file, err := os.Create(configPath)
+			if err != nil {
+				fmt.Printf("create config file error: %v\n", err)
+				return err
+			}
+			defer file.Close()
+
+			viper.SetDefault("logLevel", "info")
+			viper.SetDefault("screensaverConfig", *NewScreensaverConfig())
+		} else {
+			fmt.Println("read config file error:", err)
+			return err
+		}
+	}
+
+	err := viper.WriteConfig()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
