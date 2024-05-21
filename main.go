@@ -3,12 +3,14 @@ package main
 import (
 	"SeewoMitM/internal/helper"
 	"SeewoMitM/internal/log"
+	"SeewoMitM/model"
 	"embed"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"io"
 	"os"
 	"sync"
@@ -83,7 +85,7 @@ func main() {
 			}
 		}
 		if logLevel == "" {
-			logLevel = configs.LogLevel
+			logLevel = viper.Get("logLevel").(string)
 		}
 	}
 
@@ -176,7 +178,7 @@ func main() {
 
 	//启动屏保定时器
 	go func() {
-		err := LaunchScreenSaverTimer(time.Duration(configs.ScreensaverConfig.EmitTime)*time.Second, func() {
+		err := LaunchScreenSaverTimer(time.Duration(viper.Get("screensaverConfig").(model.ScreensaverConfig).EmitTime)*time.Second, func() {
 			cp := *GetConnectionPool()
 			for _, v := range cp {
 				if v.URL == "/forward/SeewoHugoHttp/SeewoHugoService" {

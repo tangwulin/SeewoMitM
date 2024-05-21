@@ -4,22 +4,19 @@ import (
 	"SeewoMitM/internal/helper"
 	"SeewoMitM/internal/log"
 	"SeewoMitM/model"
-	"strings"
+	"github.com/spf13/viper"
 )
 
 var screensaverContent model.DataContent
 
 func ParseScreensaverContent() model.DataContent {
-	gc := GetConfig()
-	if gc.ScreensaverConfig == nil {
-		return model.DataContent{}
-	}
+	screensaverConfig := viper.Get("screensaverConfig").(model.ScreensaverConfig)
 
-	imgList := make([]string, 0, len(gc.ScreensaverConfig.Contents)/2)
-	contents := make([]model.ScreensaverContentPayload, 0, len(gc.ScreensaverConfig.Contents))
+	imgList := make([]string, 0, len(screensaverConfig.Contents)/2)
+	contents := make([]model.ScreensaverContentPayload, 0, len(screensaverConfig.Contents))
 
 	//TODO: 资源预加载还需要针对spine进行处理
-	for _, c := range gc.ScreensaverConfig.Contents {
+	for _, c := range screensaverConfig.Contents {
 		switch c.Type {
 		case "image":
 			url := GetContentTrueUrl(c)
@@ -59,7 +56,7 @@ func ParseScreensaverContent() model.DataContent {
 
 	textList := make([]model.TextItem, 0)
 	// golang是没有鸭子类型吗？？？
-	for _, t := range gc.ScreensaverConfig.TextList {
+	for _, t := range screensaverConfig.TextList {
 		textList = append(textList, model.TextItem{
 			Content:    t.Content,
 			Provenance: t.Provenance,
@@ -67,13 +64,13 @@ func ParseScreensaverContent() model.DataContent {
 	}
 
 	return model.DataContent{
-		Mode:           gc.ScreensaverConfig.Mode,
+		Mode:           screensaverConfig.Mode,
 		ImageList:      imgList,
-		ExtraPayload:   &model.ExtraPayload{ScreensaverContent: contents, ScreensaverSwitchInterval: gc.ScreensaverConfig.SwitchInterval},
-		Source:         gc.ScreensaverConfig.Source,
-		Fit:            gc.ScreensaverConfig.Fit,
-		PlayMode:       gc.ScreensaverConfig.PlayMode,
-		SwitchInterval: gc.ScreensaverConfig.SwitchInterval / 1000,
+		ExtraPayload:   &model.ExtraPayload{ScreensaverContent: contents, ScreensaverSwitchInterval: screensaverConfig.SwitchInterval},
+		Source:         screensaverConfig.Source,
+		Fit:            screensaverConfig.Fit,
+		PlayMode:       screensaverConfig.PlayMode,
+		SwitchInterval: screensaverConfig.SwitchInterval / 1000,
 		TextList:       textList,
 	}
 }
