@@ -62,6 +62,9 @@ func LaunchManageServer(port int) error {
 
 			v1.GET("/getScreensaverContent", GetScreensaverContentHandler)
 			v1.POST("/getScreensaverContentByID", GetScreensaverContentByIDHandler)
+			v1.POST("/addScreensaverContent", AddScreensaverContentHandler)
+			v1.POST("/updateScreensaverContent", UpdateScreensaverContentHandler)
+			v1.POST("/deleteScreensaverContent", DeleteScreensaverContentHandler)
 		}
 	}
 
