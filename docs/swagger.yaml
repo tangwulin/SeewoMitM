@@ -1,0 +1,355 @@
+definitions:
+  model.AddScreensaverContentRequest:
+    properties:
+      content:
+        $ref: '#/definitions/model.ScreensaverContent'
+    type: object
+  model.AddScreensaverContentResponse:
+    properties:
+      code:
+        type: integer
+      data:
+        description: 添加后得到的id
+        type: integer
+      message:
+        type: string
+    type: object
+  model.BackgroundImage:
+    properties:
+      height:
+        type: integer
+      url:
+        type: string
+      width:
+        type: integer
+      x:
+        type: integer
+      "y":
+        type: integer
+    type: object
+  model.DebugOptions:
+    properties:
+      bones:
+        type: boolean
+      bounds:
+        type: boolean
+      clipping:
+        type: boolean
+      hulls:
+        type: boolean
+      meshes:
+        type: boolean
+      paths:
+        type: boolean
+      points:
+        type: boolean
+      regions:
+        type: boolean
+    type: object
+  model.DeleteScreensaverContentRequest:
+    properties:
+      id:
+        description: 屏保内容ID
+        type: integer
+    type: object
+  model.DeleteScreensaverContentResponse:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  model.GetScreensaverContentByIDRequest:
+    properties:
+      id:
+        type: integer
+    type: object
+  model.GetScreensaverContentByIDResponse:
+    properties:
+      code:
+        type: integer
+      data:
+        $ref: '#/definitions/model.ScreensaverContent'
+      message:
+        type: string
+    type: object
+  model.GetScreensaverContentResponse:
+    properties:
+      code:
+        type: integer
+      data:
+        items:
+          $ref: '#/definitions/model.ScreensaverContent'
+        type: array
+      message:
+        type: string
+    type: object
+  model.ScreensaverContent:
+    properties:
+      duration:
+        description: 持续时间（单位：毫秒）
+        type: integer
+      fit:
+        description: |-
+          只有图片和视频有的
+          适应方式
+        type: string
+      id:
+        description: ID
+        type: integer
+      loop:
+        description: |-
+          视频和Spine才有的
+          是否循环播放
+        type: boolean
+      muted:
+        description: |-
+          只有视频有的
+          是否静音
+        type: boolean
+      offsetX:
+        type: number
+      offsetY:
+        type: number
+      path:
+        description: |-
+          绝大多数都有的
+          路径
+        type: string
+      requirePreload:
+        description: 是否需要预加载
+        type: boolean
+      scale:
+        type: number
+      spinePlayerConfig:
+        allOf:
+        - $ref: '#/definitions/model.SpinePlayerConfig'
+        description: |-
+          只有Spine有的
+          SpinePlayer的配置
+      type:
+        description: 类型
+        type: string
+    type: object
+  model.SpinePlayerConfig:
+    properties:
+      alpha:
+        type: boolean
+      animation:
+        type: string
+      animations:
+        items:
+          type: string
+        type: array
+      atlasUrl:
+        type: string
+      backgroundColor:
+        type: string
+      backgroundImage:
+        $ref: '#/definitions/model.BackgroundImage'
+      controlBones:
+        items:
+          type: string
+        type: array
+      debug:
+        $ref: '#/definitions/model.DebugOptions'
+      defaultMix:
+        type: number
+      fullScreenBackgroundColor:
+        type: string
+      jsonUrl:
+        type: string
+      premultipliedAlpha:
+        type: boolean
+      rawDataURIs:
+        additionalProperties:
+          type: string
+        type: object
+      showControls:
+        type: boolean
+      skelUrl:
+        type: string
+      skin:
+        type: string
+      skins:
+        items:
+          type: string
+        type: array
+      viewport:
+        $ref: '#/definitions/model.ViewportOptions'
+    type: object
+  model.UpdateScreensaverContentRequest:
+    properties:
+      content:
+        allOf:
+        - $ref: '#/definitions/model.ScreensaverContent'
+        description: The screensaver content to be updated.
+      id:
+        type: integer
+    type: object
+  model.UpdateScreensaverContentResponse:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  model.Viewport:
+    properties:
+      height:
+        type: integer
+      padBottom:
+        type: integer
+      padLeft:
+        type: integer
+      padRight:
+        type: integer
+      padTop:
+        type: integer
+      width:
+        type: integer
+      x:
+        type: integer
+      "y":
+        type: integer
+    type: object
+  model.ViewportOptions:
+    properties:
+      animations:
+        additionalProperties:
+          $ref: '#/definitions/model.Viewport'
+        type: object
+      debugRender:
+        type: boolean
+      height:
+        type: integer
+      padBottom:
+        type: integer
+      padLeft:
+        type: integer
+      padRight:
+        type: integer
+      padTop:
+        type: integer
+      transitionTime:
+        type: number
+      width:
+        type: integer
+      x:
+        type: integer
+      "y":
+        type: integer
+    type: object
+info:
+  contact: {}
+paths:
+  /api/v1/addScreensaverContent:
+    post:
+      consumes:
+      - application/json
+      description: 添加屏保
+      parameters:
+      - description: 屏保内容
+        in: body
+        name: content
+        required: true
+        schema:
+          $ref: '#/definitions/model.AddScreensaverContentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.AddScreensaverContentResponse'
+      summary: 添加屏保接口
+      tags:
+      - 屏保相关接口
+  /api/v1/deleteScreensaverContent:
+    post:
+      consumes:
+      - application/json
+      description: 删除屏保
+      parameters:
+      - description: 屏保id
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/model.DeleteScreensaverContentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.DeleteScreensaverContentResponse'
+      summary: 删除屏保接口
+      tags:
+      - 屏保相关接口
+  /api/v1/getScreensaverContent:
+    get:
+      consumes:
+      - application/json
+      description: 获取所有屏保列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.GetScreensaverContentResponse'
+      summary: 屏保列表接口
+      tags:
+      - 屏保相关接口
+  /api/v1/getScreensaverContentByID:
+    post:
+      consumes:
+      - application/json
+      description: 根据屏保id获取屏保详情
+      parameters:
+      - description: 屏保id
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/model.GetScreensaverContentByIDRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.GetScreensaverContentByIDResponse'
+      summary: 获取屏保详情接口
+      tags:
+      - 屏保相关接口
+  /api/v1/updateScreensaverContent:
+    post:
+      consumes:
+      - application/json
+      description: 更新屏保
+      parameters:
+      - description: 屏保id
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdateScreensaverContentRequest'
+      - description: 屏保内容
+        in: body
+        name: content
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdateScreensaverContentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.UpdateScreensaverContentResponse'
+      summary: 更新屏保接口
+      tags:
+      - 屏保相关接口
+swagger: "2.0"

@@ -1,0 +1,531 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/api/v1/addScreensaverContent": {
+            "post": {
+                "description": "添加屏保",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "屏保相关接口"
+                ],
+                "summary": "添加屏保接口",
+                "parameters": [
+                    {
+                        "description": "屏保内容",
+                        "name": "content",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.AddScreensaverContentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.AddScreensaverContentResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/deleteScreensaverContent": {
+            "post": {
+                "description": "删除屏保",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "屏保相关接口"
+                ],
+                "summary": "删除屏保接口",
+                "parameters": [
+                    {
+                        "description": "屏保id",
+                        "name": "id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.DeleteScreensaverContentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.DeleteScreensaverContentResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/getScreensaverContent": {
+            "get": {
+                "description": "获取所有屏保列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "屏保相关接口"
+                ],
+                "summary": "屏保列表接口",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.GetScreensaverContentResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/getScreensaverContentByID": {
+            "post": {
+                "description": "根据屏保id获取屏保详情",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "屏保相关接口"
+                ],
+                "summary": "获取屏保详情接口",
+                "parameters": [
+                    {
+                        "description": "屏保id",
+                        "name": "id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.GetScreensaverContentByIDRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.GetScreensaverContentByIDResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/updateScreensaverContent": {
+            "post": {
+                "description": "更新屏保",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "屏保相关接口"
+                ],
+                "summary": "更新屏保接口",
+                "parameters": [
+                    {
+                        "description": "屏保id",
+                        "name": "id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.UpdateScreensaverContentRequest"
+                        }
+                    },
+                    {
+                        "description": "屏保内容",
+                        "name": "content",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.UpdateScreensaverContentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.UpdateScreensaverContentResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "model.AddScreensaverContentRequest": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "$ref": "#/definitions/model.ScreensaverContent"
+                }
+            }
+        },
+        "model.AddScreensaverContentResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "description": "添加后得到的id",
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.BackgroundImage": {
+            "type": "object",
+            "properties": {
+                "height": {
+                    "type": "integer"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "width": {
+                    "type": "integer"
+                },
+                "x": {
+                    "type": "integer"
+                },
+                "y": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.DebugOptions": {
+            "type": "object",
+            "properties": {
+                "bones": {
+                    "type": "boolean"
+                },
+                "bounds": {
+                    "type": "boolean"
+                },
+                "clipping": {
+                    "type": "boolean"
+                },
+                "hulls": {
+                    "type": "boolean"
+                },
+                "meshes": {
+                    "type": "boolean"
+                },
+                "paths": {
+                    "type": "boolean"
+                },
+                "points": {
+                    "type": "boolean"
+                },
+                "regions": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "model.DeleteScreensaverContentRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "屏保内容ID",
+                    "type": "integer"
+                }
+            }
+        },
+        "model.DeleteScreensaverContentResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.GetScreensaverContentByIDRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.GetScreensaverContentByIDResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "$ref": "#/definitions/model.ScreensaverContent"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.GetScreensaverContentResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.ScreensaverContent"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.ScreensaverContent": {
+            "type": "object",
+            "properties": {
+                "duration": {
+                    "description": "持续时间（单位：毫秒）",
+                    "type": "integer"
+                },
+                "fit": {
+                    "description": "只有图片和视频有的\n适应方式",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "ID",
+                    "type": "integer"
+                },
+                "loop": {
+                    "description": "视频和Spine才有的\n是否循环播放",
+                    "type": "boolean"
+                },
+                "muted": {
+                    "description": "只有视频有的\n是否静音",
+                    "type": "boolean"
+                },
+                "offsetX": {
+                    "type": "number"
+                },
+                "offsetY": {
+                    "type": "number"
+                },
+                "path": {
+                    "description": "绝大多数都有的\n路径",
+                    "type": "string"
+                },
+                "requirePreload": {
+                    "description": "是否需要预加载",
+                    "type": "boolean"
+                },
+                "scale": {
+                    "type": "number"
+                },
+                "spinePlayerConfig": {
+                    "description": "只有Spine有的\nSpinePlayer的配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.SpinePlayerConfig"
+                        }
+                    ]
+                },
+                "type": {
+                    "description": "类型",
+                    "type": "string"
+                }
+            }
+        },
+        "model.SpinePlayerConfig": {
+            "type": "object",
+            "properties": {
+                "alpha": {
+                    "type": "boolean"
+                },
+                "animation": {
+                    "type": "string"
+                },
+                "animations": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "atlasUrl": {
+                    "type": "string"
+                },
+                "backgroundColor": {
+                    "type": "string"
+                },
+                "backgroundImage": {
+                    "$ref": "#/definitions/model.BackgroundImage"
+                },
+                "controlBones": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "debug": {
+                    "$ref": "#/definitions/model.DebugOptions"
+                },
+                "defaultMix": {
+                    "type": "number"
+                },
+                "fullScreenBackgroundColor": {
+                    "type": "string"
+                },
+                "jsonUrl": {
+                    "type": "string"
+                },
+                "premultipliedAlpha": {
+                    "type": "boolean"
+                },
+                "rawDataURIs": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "showControls": {
+                    "type": "boolean"
+                },
+                "skelUrl": {
+                    "type": "string"
+                },
+                "skin": {
+                    "type": "string"
+                },
+                "skins": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "viewport": {
+                    "$ref": "#/definitions/model.ViewportOptions"
+                }
+            }
+        },
+        "model.UpdateScreensaverContentRequest": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "description": "The screensaver content to be updated.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.ScreensaverContent"
+                        }
+                    ]
+                },
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.UpdateScreensaverContentResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Viewport": {
+            "type": "object",
+            "properties": {
+                "height": {
+                    "type": "integer"
+                },
+                "padBottom": {
+                    "type": "integer"
+                },
+                "padLeft": {
+                    "type": "integer"
+                },
+                "padRight": {
+                    "type": "integer"
+                },
+                "padTop": {
+                    "type": "integer"
+                },
+                "width": {
+                    "type": "integer"
+                },
+                "x": {
+                    "type": "integer"
+                },
+                "y": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.ViewportOptions": {
+            "type": "object",
+            "properties": {
+                "animations": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/model.Viewport"
+                    }
+                },
+                "debugRender": {
+                    "type": "boolean"
+                },
+                "height": {
+                    "type": "integer"
+                },
+                "padBottom": {
+                    "type": "integer"
+                },
+                "padLeft": {
+                    "type": "integer"
+                },
+                "padRight": {
+                    "type": "integer"
+                },
+                "padTop": {
+                    "type": "integer"
+                },
+                "transitionTime": {
+                    "type": "number"
+                },
+                "width": {
+                    "type": "integer"
+                },
+                "x": {
+                    "type": "integer"
+                },
+                "y": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
+}
