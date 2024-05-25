@@ -17,6 +17,8 @@ type Config struct {
 	ScreensaverConfig *model.ScreensaverConfig `json:"screensaverConfig"`
 }
 
+var globalConfig *Config
+
 func InitConfig(configPath string) error {
 	dir, fileName := path.Split(configPath)
 	viper.SetConfigFile(fileName)
@@ -41,12 +43,20 @@ func InitConfig(configPath string) error {
 			fmt.Println("read config file error:", err)
 			return err
 		}
+		err := viper.WriteConfig()
+		if err != nil {
+			return err
+		}
 	}
 
-	err := viper.WriteConfig()
-	if err != nil {
+	if err := viper.Unmarshal(&globalConfig); err != nil {
+		fmt.Println("unmarshal config file error:", err)
 		return err
 	}
 
 	return nil
+}
+
+func SaveConfig() error {
+	return viper.WriteConfig()
 }

@@ -3,13 +3,12 @@ package main
 import (
 	"SeewoMitM/internal/log"
 	"SeewoMitM/model"
-	"github.com/spf13/viper"
 )
 
 var screensaverContent model.DataContent
 
 func ParseScreensaverContent() model.DataContent {
-	screensaverConfig := viper.Get("screensaverConfig").(model.ScreensaverConfig)
+	screensaverConfig := globalConfig.ScreensaverConfig
 
 	imgList := make([]string, 0, len(screensaverConfig.Contents)/2)
 	contents := make([]model.ScreensaverContentPayload, 0, len(screensaverConfig.Contents))
