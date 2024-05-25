@@ -3,7 +3,6 @@ module SeewoMitM
 go 1.22
 
 require (
-	github.com/Yiwen-Chan/tinydb v0.0.0-20230129042445-3321642f0674
 	github.com/gin-gonic/gin v1.9.1
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.1
