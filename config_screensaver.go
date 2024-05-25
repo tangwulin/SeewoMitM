@@ -2,6 +2,7 @@ package main
 
 import (
 	"SeewoMitM/model"
+	"errors"
 )
 
 func NewScreensaverConfig() *model.ScreensaverConfig {
@@ -56,4 +57,66 @@ func NewScreensaverSpineContent(spinePlayerConfig *model.SpinePlayerConfig, requ
 		OffsetX:           0,
 		OffsetY:           0,
 	}
+}
+
+func GetScreensaverContentList() []model.ScreensaverContent {
+	return globalConfig.ScreensaverConfig.Contents
+}
+
+func GetScreensaverContentByID(id int) (result model.ScreensaverContent, err error) {
+	for _, v := range globalConfig.ScreensaverConfig.Contents {
+		if v.ID == id {
+			return v, nil
+		}
+	}
+
+	return result, errors.New("未找到该内容")
+}
+
+func AddScreensaverContent(content model.ScreensaverContent) (id int, err error) {
+	contentsLen := len(globalConfig.ScreensaverConfig.Contents)
+	if contentsLen > 0 {
+		content.ID = globalConfig.ScreensaverConfig.Contents[contentsLen-1].ID + 1
+	} else {
+		content.ID = 0
+	}
+
+	globalConfig.ScreensaverConfig.Contents = append(globalConfig.ScreensaverConfig.Contents, content)
+	err = SaveConfig()
+	if err != nil {
+		return -1, err
+	}
+	return content.ID, nil
+}
+
+func DeleteScreensaverContent(id int) (err error) {
+	for i, content := range globalConfig.ScreensaverConfig.Contents {
+		if content.ID == id {
+			globalConfig.ScreensaverConfig.Contents = append(globalConfig.ScreensaverConfig.Contents[:i], globalConfig.ScreensaverConfig.Contents[i+1:]...)
+			break
+		}
+		return errors.New("未找到该内容")
+	}
+
+	err = SaveConfig()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func UpdateScreensaverContent(id int, newContent model.ScreensaverContent) (err error) {
+	for i, content := range globalConfig.ScreensaverConfig.Contents {
+		if content.ID == id {
+			globalConfig.ScreensaverConfig.Contents[i] = newContent
+			break
+		}
+		return errors.New("未找到该内容")
+	}
+
+	err = SaveConfig()
+	if err != nil {
+		return err
+	}
+	return nil
 }
