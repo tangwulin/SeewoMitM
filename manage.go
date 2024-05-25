@@ -8,6 +8,15 @@ import (
 	"strconv"
 )
 
+// @title SeewoMitM管理API
+// @version 1.0
+// @description 用于为SeewoMitM的WebUI提供管理API
+// @termsOfService http://swagger.io/terms/
+
+// @license.name GNU General Public License v3.0
+// @license.url https://www.gnu.org/licenses/gpl-3.0.html
+
+// @host 127.0.0.1:11451
 func LaunchManageServer(port int) error {
 	engine := gin.New()
 
