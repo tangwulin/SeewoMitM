@@ -2,7 +2,6 @@ package main
 
 import (
 	"SeewoMitM/model"
-	"errors"
 	"fmt"
 	"github.com/spf13/viper"
 	"os"
@@ -25,9 +24,7 @@ func InitConfig(configPath string) error {
 	viper.AddConfigPath(dir)
 
 	if err := viper.ReadInConfig(); err != nil {
-		var configFileNotFoundError viper.ConfigFileNotFoundError
-
-		if errors.As(err, &configFileNotFoundError) {
+		if _, err := os.Stat(configPath); os.IsNotExist(err) {
 			fmt.Println("config file not found, creating default config file...")
 			// 创建默认配置文件
 			file, err := os.Create(configPath)
@@ -43,6 +40,7 @@ func InitConfig(configPath string) error {
 			fmt.Println("read config file error:", err)
 			return err
 		}
+
 		err := viper.WriteConfig()
 		if err != nil {
 			return err

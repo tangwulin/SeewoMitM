@@ -29,7 +29,7 @@ func main() {
 	// 解析命令行参数
 	flag.Parse()
 
-	var configFilePath = "./config.json"
+	var configFilePath = ".\\config.json"
 	var logDir = ""
 	var upstreamPort int
 	var downstreamPort int
